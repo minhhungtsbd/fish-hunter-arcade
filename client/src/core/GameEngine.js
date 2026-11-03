@@ -38,6 +38,7 @@ export class GameEngine {
     this.ui = null; // Sẽ được gán từ UIController
     this.isRunning = false;
     this.lastTime = performance.now();
+    this.isPointerDown = false;
 
     this.oceanTime = 0;
     this.setupResize();
@@ -64,30 +65,25 @@ export class GameEngine {
     };
 
     window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', () => setTimeout(handleResize, 150));
     handleResize();
   }
 
   setupInputs() {
     const getPos = (e) => {
       const rect = this.canvas.getBoundingClientRect();
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      const clientX = e.clientX ?? (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+      const clientY = e.clientY ?? (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
       return {
         x: clientX - rect.left,
         y: clientY - rect.top,
       };
     };
 
-    const handlePointerMove = (e) => {
-      const pos = getPos(e);
-      const localCannon = this.cannons[this.localSlotId];
-      if (localCannon && !localCannon.lockedTarget) {
-        localCannon.aimAt(pos.x, pos.y);
-      }
-    };
-
     const handlePointerDown = (e) => {
-      this.audio.init(); // Mở khóa Web Audio API lần đầu click
+      if (e.target !== this.canvas) return;
+      this.audio.init(); // Mở khóa Web Audio API lần đầu chạm
+      this.isPointerDown = true;
       const pos = getPos(e);
       const localCannon = this.cannons[this.localSlotId];
       if (!localCannon) return;
@@ -95,14 +91,13 @@ export class GameEngine {
       // Kiểm tra xem người chơi có click trúng con cá nào để Khóa Mục Tiêu (Lock-On) không
       let clickedFish = null;
       for (const fish of this.spawner.fishes) {
-        if (!fish.isDead && Math.hypot(fish.x - pos.x, fish.y - pos.y) <= fish.radius + 15) {
+        if (!fish.isDead && Math.hypot(fish.x - pos.x, fish.y - pos.y) <= fish.radius + 18) {
           clickedFish = fish;
           break;
         }
       }
 
       if (clickedFish) {
-        // Khóa mục tiêu hoặc hủy khóa
         if (localCannon.lockedTarget === clickedFish) {
           localCannon.lockedTarget = null;
         } else {
@@ -114,7 +109,7 @@ export class GameEngine {
         localCannon.aimAt(pos.x, pos.y);
       }
 
-      // Bắn 1 viên đạn
+      // Bắn phát đạn đầu tiên
       const bullet = localCannon.shoot();
       if (bullet) {
         this.bullets.push(bullet);
@@ -122,10 +117,22 @@ export class GameEngine {
       }
     };
 
-    this.canvas.addEventListener('mousemove', handlePointerMove);
-    this.canvas.addEventListener('mousedown', handlePointerDown);
-    this.canvas.addEventListener('touchmove', handlePointerMove, { passive: true });
-    this.canvas.addEventListener('touchstart', handlePointerDown, { passive: true });
+    const handlePointerMove = (e) => {
+      const pos = getPos(e);
+      const localCannon = this.cannons[this.localSlotId];
+      if (localCannon && !localCannon.lockedTarget) {
+        localCannon.aimAt(pos.x, pos.y);
+      }
+    };
+
+    const handlePointerUp = () => {
+      this.isPointerDown = false;
+    };
+
+    this.canvas.addEventListener('pointerdown', handlePointerDown);
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
+    window.addEventListener('pointercancel', handlePointerUp);
 
     // Phím tắt bàn phím
     window.addEventListener('keydown', (e) => {
@@ -198,6 +205,18 @@ export class GameEngine {
       const bullet = cannon.update(dt, this.spawner.fishes);
       if (bullet) {
         this.bullets.push(bullet);
+      }
+    }
+
+    // Bắn liên thanh khi người chơi giữ ngón tay/chuột trên màn hình
+    if (this.isPointerDown) {
+      const localCannon = this.cannons[this.localSlotId];
+      if (localCannon && localCannon.canShoot()) {
+        const bullet = localCannon.shoot();
+        if (bullet) {
+          this.bullets.push(bullet);
+          if (this.ui) this.ui.updateHUD();
+        }
       }
     }
 

@@ -9,7 +9,10 @@
 body, html {
   width: 100%;
   height: 100%;
+  height: 100dvh;
+  position: fixed;
   overflow: hidden;
+  touch-action: none;
   background-color: #000c14;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   color: #ffffff;
@@ -18,11 +21,13 @@ body, html {
 #game-container {
   position: relative;
   width: 100vw;
-  height: 100vh;
+  height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
   background: radial-gradient(circle at center, #06324a 0%, #00121d 100%);
+  overflow: hidden;
+  touch-action: none;
 }
 
 #game-canvas {
@@ -30,6 +35,7 @@ body, html {
   height: 100%;
   display: block;
   cursor: crosshair;
+  touch-action: none;
 }
 
 /* Thanh điều khiển trên cùng (Top Arcade Bar) */
@@ -329,4 +335,219 @@ body, html {
   font-family: monospace;
   font-size: 13px;
   outline: none;
+}
+
+/* Các lớp tiện ích bổ sung */
+.arcade-select {
+  background: #092032;
+  color: #ffd700;
+  border: 1px solid rgba(255, 215, 0, 0.5);
+  border-radius: 8px;
+  padding: 5px 8px;
+  font-size: 11px;
+  font-weight: bold;
+  outline: none;
+  cursor: pointer;
+}
+
+.seat-picker-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.seat-picker-label {
+  font-size: 11px;
+  color: #81d4fa;
+  font-weight: bold;
+}
+
+.seat-picker-select {
+  background: #092032;
+  color: #00e5ff;
+  border: 1px solid rgba(0, 229, 255, 0.4);
+  border-radius: 12px;
+  padding: 4px 8px;
+  font-size: 11px;
+  outline: none;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.bet-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Nút Bắn nhanh nổi bật trên điện thoại */
+.mobile-shoot-btn {
+  display: none;
+  background: linear-gradient(135deg, #ff1744 0%, #d50000 100%);
+  color: #ffffff;
+  border: 2px solid #ff5252;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 900;
+  border-radius: 20px;
+  box-shadow: 0 0 12px rgba(255, 23, 68, 0.6);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.mobile-shoot-btn:active {
+  transform: scale(0.92);
+  background: #ff5252;
+}
+
+/* Khung nhắc nhở xoay ngang màn hình (Rotate Device Prompt) */
+.rotate-prompt {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 10, 25, 0.92);
+  backdrop-filter: blur(8px);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  text-align: center;
+}
+
+.rotate-prompt.dismissed {
+  display: none !important;
+}
+
+.rotate-box {
+  background: linear-gradient(180deg, #09263e 0%, #031422 100%);
+  border: 2px solid #00e5ff;
+  box-shadow: 0 0 25px rgba(0, 229, 255, 0.4);
+  padding: 24px 20px;
+  border-radius: 20px;
+  max-width: 340px;
+}
+
+.rotate-icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+  animation: phoneSpin 2s infinite ease-in-out;
+}
+
+@keyframes phoneSpin {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(90deg); }
+}
+
+.rotate-title {
+  font-size: 16px;
+  font-weight: 900;
+  color: #ffd700;
+  margin-bottom: 8px;
+}
+
+.rotate-desc {
+  font-size: 13px;
+  color: #b0bec5;
+  line-height: 1.5;
+}
+
+/* =========================================================
+   TỐI ƯU HÓA GIAO DIỆN MÀN HÌNH ĐIỆN THOẠI (RESPONSIVE MOBILE)
+   ========================================================= */
+
+/* Khi màn hình đứng (Portrait) trên điện thoại: Hiện lời nhắc xoay ngang */
+@media (orientation: portrait) and (max-width: 768px) {
+  .rotate-prompt:not(.dismissed) {
+    display: flex;
+  }
+}
+
+/* Màn hình điện thoại nhỏ hoặc xoay ngang (Mobile & Landscape) */
+@media (max-width: 768px), (max-height: 520px) {
+  .brand {
+    padding: 4px 8px;
+    gap: 4px;
+  }
+  .brand-title {
+    font-size: 11px;
+  }
+  .room-badge {
+    display: none;
+  }
+
+  /* Ẩn chữ trên các nút top bar, chỉ giữ lại icon để tiết kiệm diện tích */
+  .top-controls {
+    gap: 4px;
+  }
+  .btn-text {
+    display: none;
+  }
+  .arcade-btn {
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+  .arcade-select {
+    padding: 4px 6px;
+    font-size: 10px;
+  }
+
+  /* Thanh công cụ người chơi phía dưới thu gọn vừa vặn ngón tay */
+  .bottom-bar {
+    bottom: 4px;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 18px;
+    transform: translateX(-50%) scale(0.92);
+    transform-origin: bottom center;
+  }
+
+  .seat-picker-label {
+    display: none;
+  }
+  .seat-picker-select {
+    padding: 3px 6px;
+    font-size: 10px;
+  }
+
+  .user-coins-box {
+    padding: 3px 8px;
+    gap: 4px;
+  }
+  .user-coins-num {
+    font-size: 14px;
+    min-width: 50px;
+  }
+
+  .bet-control {
+    padding: 2px 6px;
+    gap: 4px;
+  }
+  .bet-display {
+    font-size: 14px;
+    min-width: 35px;
+  }
+  .round-btn {
+    width: 24px;
+    height: 24px;
+    font-size: 14px;
+  }
+
+  /* Bật nút Bắn nhanh trên điện thoại */
+  .mobile-shoot-btn {
+    display: block;
+  }
+
+  /* Cửa sổ Modal co giãn theo màn hình điện thoại */
+  .modal-card {
+    width: 95%;
+    max-height: 90dvh;
+    padding: 14px;
+  }
+  .fish-grid {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
 }

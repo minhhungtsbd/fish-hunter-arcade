@@ -49,8 +49,17 @@ export class Cannon {
   }
 
   resize(width, height) {
-    this.x = width * this.config.posRatio.x;
+    const isNarrow = width < 850;
+    let ratioX = this.config.posRatio.x;
+    // Trên màn hình hẹp/di động: đẩy pháo ra gần 2 mép hơn để không chạm vào thanh công cụ ở giữa
+    if (isNarrow) {
+      if (this.slotId === 0 || this.slotId === 2) ratioX = 0.16;
+      if (this.slotId === 1 || this.slotId === 3) ratioX = 0.84;
+    }
+    this.x = width * ratioX;
     this.y = height * this.config.posRatio.y;
+    // Tỉ lệ scale pháo theo kích thước màn hình
+    this.scale = Math.min(1.0, Math.max(0.68, width / 950));
   }
 
   changeBet(direction) {
@@ -205,8 +214,10 @@ export class Cannon {
       return;
     }
 
+    const s = this.scale || 1.0;
     ctx.save();
     ctx.translate(this.x, this.y);
+    ctx.scale(s, s);
 
     // 1. Mâm pháo kim loại tròn (Cannon Base)
     ctx.fillStyle = '#263238';
@@ -281,11 +292,13 @@ export class Cannon {
   }
 
   renderSlotHUD(ctx) {
+    const s = this.scale || 1.0;
     const isBottom = this.slotId === 0 || this.slotId === 1;
-    const hudY = isBottom ? this.y - 68 : this.y + 48;
+    const hudY = isBottom ? this.y - (65 * s) : this.y + (45 * s);
 
     ctx.save();
     ctx.translate(this.x, hudY);
+    ctx.scale(s, s);
 
     // Hộp nền HUD
     ctx.fillStyle = 'rgba(10, 25, 47, 0.85)';

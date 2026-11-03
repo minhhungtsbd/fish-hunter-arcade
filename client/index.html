@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Bắn Cá Ăn Xu Siêu Thị 4P - Arcade Fish Hunter Multiplayer</title>
   <link rel="stylesheet" href="./src/style.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐟</text></svg>">
@@ -20,25 +20,25 @@
       </div>
 
       <div class="top-controls">
-        <select id="difficulty-select" style="background: #092032; color: #ffd700; border: 1px solid rgba(255,215,0,0.5); border-radius: 8px; padding: 5px 8px; font-size: 11px; font-weight: bold; outline: none; cursor: pointer;" title="Chọn chế độ độ khó: Dễ, Trung bình, Khó">
-          <option value="EASY">🎯 Dễ (Thư giãn)</option>
-          <option value="NORMAL" selected>⚖️ Trung bình (Chuẩn)</option>
-          <option value="HARD">🔥 Khó (Thử thách)</option>
+        <select id="difficulty-select" class="arcade-select" title="Chọn chế độ độ khó: Dễ, Trung bình, Khó">
+          <option value="EASY">🎯 Dễ</option>
+          <option value="NORMAL" selected>⚖️ Chuẩn</option>
+          <option value="HARD">🔥 Khó</option>
         </select>
-        <button id="btn-sound" class="arcade-btn" title="Bật/Tắt âm thanh hiệu ứng">🔊 Âm thanh</button>
-        <button id="btn-music" class="arcade-btn" title="Bật/Tắt nhạc nền đại dương">🎵 Nhạc nền</button>
-        <button id="btn-toggle-bots" class="arcade-btn" title="Bật/Tắt 3 AI Bot chơi cùng">🤖 Bật 3 Bot</button>
-        <button id="btn-paytable" class="arcade-btn" title="Xem danh sách cá & thưởng">📖 Bảng thưởng</button>
-        <button id="btn-invite" class="arcade-btn" title="Mời bạn bè cùng chơi">👥 Mời bạn</button>
-        <button id="btn-fullscreen" class="arcade-btn" title="Toàn màn hình">⛶</button>
+        <button id="btn-sound" class="arcade-btn" title="Bật/Tắt âm thanh hiệu ứng"><span class="btn-icon">🔊</span><span class="btn-text"> Âm thanh</span></button>
+        <button id="btn-music" class="arcade-btn" title="Bật/Tắt nhạc nền đại dương"><span class="btn-icon">🎵</span><span class="btn-text"> Nhạc nền</span></button>
+        <button id="btn-toggle-bots" class="arcade-btn" title="Bật/Tắt 3 AI Bot chơi cùng"><span class="btn-icon">🤖</span><span class="btn-text"> Bật 3 Bot</span></button>
+        <button id="btn-paytable" class="arcade-btn" title="Xem danh sách cá & thưởng"><span class="btn-icon">📖</span><span class="btn-text"> Bảng thưởng</span></button>
+        <button id="btn-invite" class="arcade-btn" title="Mời bạn bè cùng chơi"><span class="btn-icon">👥</span><span class="btn-text"> Mời bạn</span></button>
+        <button id="btn-fullscreen" class="arcade-btn" title="Toàn màn hình"><span class="btn-icon">⛶</span></button>
       </div>
     </header>
 
     <!-- Thanh công cụ người chơi phía dưới -->
     <footer class="bottom-bar">
-      <div style="display: flex; align-items: center; gap: 6px;">
-        <span style="font-size: 11px; color: #81d4fa; font-weight: bold;">VỊ TRÍ:</span>
-        <select id="seat-select" style="background: #092032; color: #00e5ff; border: 1px solid rgba(0,229,255,0.4); border-radius: 12px; padding: 4px 8px; font-size: 11px; outline: none; font-weight: bold; cursor: pointer;">
+      <div class="seat-picker-box">
+        <span class="seat-picker-label">GHẾ:</span>
+        <select id="seat-select" class="seat-picker-select">
           <option value="0">Ghế 1 (Dưới Trái)</option>
           <option value="1">Ghế 2 (Dưới Phải)</option>
           <option value="2">Ghế 3 (Trên Trái)</option>
@@ -54,7 +54,7 @@
       </div>
 
       <!-- Điều khiển mức cược đạn -->
-      <div style="display: flex; align-items: center; gap: 6px;">
+      <div class="bet-container">
         <button id="btn-bet-down" class="round-btn" title="Giảm mức cược">-</button>
         <div class="bet-control" title="Mức xu tiêu tốn mỗi phát bắn">
           <span class="bet-label">CƯỢC</span>
@@ -64,9 +64,21 @@
       </div>
 
       <!-- Tự động bắn & Nạp xu miễn phí -->
-      <button id="btn-auto-fire" class="arcade-btn" title="Bật/Tắt chế độ tự động bắn liên tục (Phím A)">⚡ Tự động bắn (A)</button>
-      <button id="btn-free-coins" class="arcade-btn gold" title="Nhận ngay 5,000 xu miễn phí">+5,000 Xu Free</button>
+      <button id="btn-auto-fire" class="arcade-btn" title="Bật/Tắt chế độ tự động bắn liên tục (Phím A)"><span class="btn-icon">⚡</span><span class="btn-text"> Tự động</span></button>
+      <button id="btn-free-coins" class="arcade-btn gold" title="Nhận ngay 5,000 xu miễn phí">+5k Xu</button>
+      <!-- Nút Bắn Nhanh dành riêng cho Mobile -->
+      <button id="btn-mobile-fire" class="mobile-shoot-btn" title="Chạm để bắn liên thanh">🎯 BẮN</button>
     </footer>
+
+    <!-- Khung nhắc nhở xoay ngang màn hình tối ưu cho điện thoại -->
+    <div id="rotate-prompt" class="rotate-prompt">
+      <div class="rotate-box">
+        <div class="rotate-icon">📱 ➔ 🔄</div>
+        <div class="rotate-title">XOAY NGANG ĐIỆN THOẠI</div>
+        <div class="rotate-desc">Trải nghiệm bắn cá siêu thị tuyệt vời nhất khi xoay ngang màn hình điện thoại!</div>
+        <button id="btn-close-rotate" class="arcade-btn gold" style="margin-top: 12px; width: 100%; justify-content: center;">Vẫn chơi màn hình dọc</button>
+      </div>
+    </div>
 
     <!-- Hộp thoại Bảng Trả Thưởng (Paytable) -->
     <div id="modal-paytable" class="modal-overlay">

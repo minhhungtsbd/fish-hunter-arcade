@@ -223,6 +223,32 @@ export class UIController {
         );
       });
     }
+
+    // 12. Nút Bắn Nhanh dành riêng cho Mobile
+    const btnMobileFire = document.getElementById('btn-mobile-fire');
+    if (btnMobileFire) {
+      btnMobileFire.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        this.game.audio.init();
+        const localCannon = this.game.cannons[this.game.localSlotId];
+        if (localCannon) {
+          const bullet = localCannon.shoot();
+          if (bullet) {
+            this.game.bullets.push(bullet);
+            this.updateHUD();
+          }
+        }
+      });
+    }
+
+    // 13. Tắt thông báo xoay màn hình khi người chơi muốn chơi dọc
+    const btnCloseRotate = document.getElementById('btn-close-rotate');
+    const rotatePrompt = document.getElementById('rotate-prompt');
+    if (btnCloseRotate && rotatePrompt) {
+      btnCloseRotate.addEventListener('click', () => {
+        rotatePrompt.classList.add('dismissed');
+      });
+    }
   }
 
   updateHUD() {
