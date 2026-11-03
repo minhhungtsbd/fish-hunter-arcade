@@ -103,47 +103,66 @@ export class FishSpawner {
     this.spawnTimer += dt;
     this.bossTimer += dt;
 
-    // Duy trì mật độ từ 12 - 20 con cá trên màn hình
-    if (this.spawnTimer > 1100 && this.fishes.length < 22) {
+    // Duy trì mật độ từ 14 - 24 con cá trên màn hình
+    if (this.spawnTimer > 1000 && this.fishes.length < 24) {
       this.spawnTimer = 0;
 
       const roll = Math.random();
-      if (roll < 0.28) {
+      if (roll < 0.18) {
         this.spawnClownSchool();
-      } else if (roll < 0.48) {
+      } else if (roll < 0.30) {
         this.spawnFish('BUTTERFLY');
-      } else if (roll < 0.65) {
+      } else if (roll < 0.42) {
         this.spawnFish('PUFFER');
-      } else if (roll < 0.78) {
+      } else if (roll < 0.52) {
+        this.spawnFish('JELLYFISH');
+      } else if (roll < 0.62) {
         this.spawnFish('TURTLE');
-      } else if (roll < 0.88) {
+      } else if (roll < 0.72) {
+        this.spawnFish('SWORDFISH');
+      } else if (roll < 0.80) {
         this.spawnFish('STINGRAY');
-      } else if (roll < 0.94) {
+      } else if (roll < 0.87) {
+        this.spawnFish('LANTERN_FISH');
+      } else if (roll < 0.92) {
+        this.spawnFish('LOBSTER');
+      } else if (roll < 0.95) {
         this.spawnFish('OCTOPUS');
       } else if (roll < 0.97) {
+        this.spawnFish('HAMMERHEAD');
+      } else if (roll < 0.985) {
         this.spawnFish('LIGHTNING_EEL');
       } else {
         this.spawnFish('BOMB_CRAB');
       }
     }
 
-    // Chu kỳ xuất hiện Boss Rồng Vàng hoặc Cá Mập Vàng
-    if (this.bossTimer > 42000) { // Mỗi 42 giây có 1 đợt Boss
+    // Chu kỳ xuất hiện Boss Rồng Vàng, Cóc Vàng hoặc Cá Mập Vàng
+    if (this.bossTimer > 38000) { // Mỗi 38 giây xuất hiện 1 Boss
       this.bossTimer = 0;
-      const isDragon = Math.random() > 0.45;
-      const bossType = isDragon ? 'GOLDEN_DRAGON' : 'GOLDEN_SHARK';
+      const bossRoll = Math.random();
+      let bossType = 'GOLDEN_DRAGON';
+      let bossName = 'BOSS RỒNG VÀNG THẦN THOẠI';
+
+      if (bossRoll < 0.35) {
+        bossType = 'GOLDEN_SHARK';
+        bossName = 'CÁ MẬP HOÀNG KIM';
+      } else if (bossRoll < 0.7) {
+        bossType = 'GOLDEN_TOAD';
+        bossName = 'CÓC VÀNG THIỀM THỪ';
+      }
 
       this.game.audio.playBossAlert();
-      this.game.particles.triggerScreenShake(15);
+      this.game.particles.triggerScreenShake(16);
       this.game.particles.addFloatingText(
         this.game.width / 2,
         this.game.height / 2 - 50,
-        isDragon ? '⚠ BOSS RỒNG VÀNG XUẤT HIỆN! ⚠' : '⚠ CÁ MẬP HOÀNG KIM XUẤT HIỆN! ⚠',
+        `⚠ ${bossName} XUẤT HIỆN! ⚠`,
         '#ffd700',
-        34
+        32
       );
 
-      this.spawnFish(bossType, null, 0.8);
+      this.spawnFish(bossType, null, 0.7);
     }
   }
 

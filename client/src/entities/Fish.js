@@ -33,6 +33,15 @@ export const FISH_CONFIGS = {
     color: '#00e676',
     accent: '#004d40',
   },
+  JELLYFISH: {
+    name: 'Sứa Phát Quang',
+    multiplier: 8,
+    hp: 7,
+    baseSpeed: 0.9,
+    radius: 30,
+    color: '#e040fb',
+    accent: '#80d8ff',
+  },
   TURTLE: {
     name: 'Rùa Biển Cổ',
     multiplier: 10,
@@ -42,6 +51,15 @@ export const FISH_CONFIGS = {
     color: '#2e7d32',
     accent: '#81c784',
   },
+  SWORDFISH: {
+    name: 'Cá Kiếm Đại Dương',
+    multiplier: 15,
+    hp: 16,
+    baseSpeed: 1.4,
+    radius: 44,
+    color: '#1976d2',
+    accent: '#00e5ff',
+  },
   STINGRAY: {
     name: 'Cá Đuối Khổng Lồ',
     multiplier: 20,
@@ -50,6 +68,24 @@ export const FISH_CONFIGS = {
     radius: 46,
     color: '#0288d1',
     accent: '#b3e5fc',
+  },
+  LANTERN_FISH: {
+    name: 'Cá Lồng Đèn Biển Sâu',
+    multiplier: 25,
+    hp: 26,
+    baseSpeed: 1.0,
+    radius: 40,
+    color: '#283593',
+    accent: '#ffd600',
+  },
+  LOBSTER: {
+    name: 'Tôm Hùm Hoàng Gia',
+    multiplier: 35,
+    hp: 36,
+    baseSpeed: 0.85,
+    radius: 42,
+    color: '#e64a19',
+    accent: '#ffab91',
   },
   OCTOPUS: {
     name: 'Bạch Tuộc Tím',
@@ -64,7 +100,7 @@ export const FISH_CONFIGS = {
     name: 'Cá Chình Sét',
     multiplier: 50,
     hp: 35,
-    baseSpeed: 1.6,
+    baseSpeed: 1.5,
     radius: 38,
     color: '#00ffff',
     accent: '#ffff00',
@@ -82,14 +118,33 @@ export const FISH_CONFIGS = {
     isSpecial: true,
     skill: 'BOMB',
   },
+  HAMMERHEAD: {
+    name: 'Cá Mập Đầu Búa',
+    multiplier: 70,
+    hp: 70,
+    baseSpeed: 1.2,
+    radius: 56,
+    color: '#455a64',
+    accent: '#90a4ae',
+  },
   GOLDEN_SHARK: {
     name: 'Cá Mập Hoàng Kim',
     multiplier: 80,
     hp: 90,
-    baseSpeed: 1.3,
+    baseSpeed: 1.2,
     radius: 64,
     color: '#ffd700',
     accent: '#ff6f00',
+  },
+  GOLDEN_TOAD: {
+    name: 'Cóc Vàng Thiềm Thừ',
+    multiplier: 150,
+    hp: 160,
+    baseSpeed: 0.7,
+    radius: 72,
+    color: '#ffd700',
+    accent: '#ff6f00',
+    isBoss: true,
   },
   GOLDEN_DRAGON: {
     name: 'Boss Rồng Vàng Thần Thoại',
@@ -115,7 +170,8 @@ export class Fish {
 
     this.pathPoints = pathPoints; // Mảng [P0, P1, P2, P3] điểm điều khiển Bezier
     this.progress = 0; // 0.0 -> 1.0
-    this.speed = (this.config.baseSpeed * speedScale * 0.00035);
+    // Giảm tốc độ bơi xuống 48% giúp cá bơi ung dung, dễ ngắm bắn
+    this.speed = (this.config.baseSpeed * speedScale * 0.00018);
 
     this.x = pathPoints[0].x;
     this.y = pathPoints[0].y;
@@ -210,11 +266,23 @@ export class Fish {
       case 'PUFFER':
         this.renderPuffer(ctx, isHit, tailWiggle);
         break;
+      case 'JELLYFISH':
+        this.renderJellyfish(ctx, isHit, tailWiggle);
+        break;
       case 'TURTLE':
         this.renderTurtle(ctx, isHit, tailWiggle);
         break;
+      case 'SWORDFISH':
+        this.renderSwordfish(ctx, isHit, tailWiggle);
+        break;
       case 'STINGRAY':
         this.renderStingray(ctx, isHit, tailWiggle);
+        break;
+      case 'LANTERN_FISH':
+        this.renderLanternFish(ctx, isHit, tailWiggle);
+        break;
+      case 'LOBSTER':
+        this.renderLobster(ctx, isHit, tailWiggle);
         break;
       case 'OCTOPUS':
         this.renderOctopus(ctx, isHit, tailWiggle);
@@ -225,8 +293,14 @@ export class Fish {
       case 'BOMB_CRAB':
         this.renderBombCrab(ctx, isHit, tailWiggle);
         break;
+      case 'HAMMERHEAD':
+        this.renderHammerhead(ctx, isHit, tailWiggle);
+        break;
       case 'GOLDEN_SHARK':
         this.renderShark(ctx, isHit, tailWiggle);
+        break;
+      case 'GOLDEN_TOAD':
+        this.renderGoldenToad(ctx, isHit, tailWiggle);
         break;
       case 'GOLDEN_DRAGON':
         this.renderDragon(ctx, isHit, tailWiggle);
@@ -592,6 +666,243 @@ export class Fish {
     ctx.fillStyle = '#000000';
     ctx.beginPath();
     ctx.arc(r * 0.48, -r * 0.15, 4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // 1. Sứa Biển Phát Quang
+  renderJellyfish(ctx, isHit, tailWiggle) {
+    const r = this.radius;
+    const pulse = 1 + Math.sin(this.swimTime * 3) * 0.12;
+
+    // Các xúc tu uốn lượn phía sau
+    ctx.strokeStyle = isHit ? '#ffffff' : this.config.accent;
+    ctx.lineWidth = 2;
+    for (let i = -3; i <= 3; i++) {
+      const wave = Math.sin(this.swimTime * 4 + i) * 12;
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.2, i * 6);
+      ctx.quadraticCurveTo(-r * 0.8, i * 8 + wave, -r * 1.5, i * 10 - wave);
+      ctx.stroke();
+    }
+
+    // Mũ sứa hình chuông vòm bán cầu
+    ctx.fillStyle = isHit ? '#ff5252' : this.config.color;
+    ctx.beginPath();
+    ctx.arc(0, 0, r * pulse, -Math.PI / 2, Math.PI / 2);
+    ctx.quadraticCurveTo(-r * 0.3, 0, 0, -r * pulse);
+    ctx.closePath();
+    ctx.fill();
+
+    // Vành phát quang dạ quang
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  }
+
+  // 2. Cá Kiếm Đại Dương
+  renderSwordfish(ctx, isHit, tailWiggle) {
+    const r = this.radius;
+
+    // Đuôi cá kiếm
+    ctx.save();
+    ctx.translate(-r * 0.8, 0);
+    ctx.rotate(tailWiggle);
+    ctx.fillStyle = isHit ? '#ffffff' : this.config.color;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(-r * 0.6, -r * 0.6);
+    ctx.lineTo(-r * 0.3, 0);
+    ctx.lineTo(-r * 0.6, r * 0.6);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    // Thân thon dài
+    ctx.fillStyle = isHit ? '#ff5252' : this.config.color;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, r * 0.8, r * 0.3, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Vây lưng dài cao
+    ctx.fillStyle = this.config.accent;
+    ctx.beginPath();
+    ctx.moveTo(-r * 0.4, -r * 0.25);
+    ctx.lineTo(0, -r * 0.8);
+    ctx.lineTo(r * 0.3, -r * 0.25);
+    ctx.closePath();
+    ctx.fill();
+
+    // Mũi kiếm nhọn dài đặc trưng
+    ctx.strokeStyle = isHit ? '#ffffff' : '#e0e0e0';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(r * 0.8, 0);
+    ctx.lineTo(r * 1.6, 0);
+    ctx.stroke();
+
+    // Mắt
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(r * 0.5, -r * 0.1, 4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // 3. Cá Lồng Đèn Biển Sâu (Anglerfish)
+  renderLanternFish(ctx, isHit, tailWiggle) {
+    const r = this.radius;
+
+    // Thân tròn màu tối
+    ctx.fillStyle = isHit ? '#ff5252' : this.config.color;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, r * 0.8, r * 0.6, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Cần câu đèn uốn cong ra trước trán
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(r * 0.4, -r * 0.4);
+    ctx.quadraticCurveTo(r * 0.8, -r * 1.2, r * 1.2, -r * 0.6);
+    ctx.stroke();
+
+    // Bóng đèn phát sáng vàng rực
+    ctx.fillStyle = '#ffd600';
+    ctx.shadowColor = '#ffff00';
+    ctx.shadowBlur = 18;
+    ctx.beginPath();
+    ctx.arc(r * 1.2, -r * 0.6, 7, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Miệng to lởm chởm răng sắc
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.moveTo(r * 0.5, r * 0.1);
+    ctx.lineTo(r * 0.8, r * 0.1);
+    ctx.lineTo(r * 0.5, r * 0.35);
+    ctx.closePath();
+    ctx.fill();
+
+    // Mắt trắng trừng
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(r * 0.4, -r * 0.15, 6, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // 4. Tôm Hùm Hoàng Gia
+  renderLobster(ctx, isHit, tailWiggle) {
+    const r = this.radius;
+
+    // Đuôi chia đốt
+    ctx.fillStyle = isHit ? '#ffffff' : this.config.color;
+    for (let i = 1; i <= 4; i++) {
+      ctx.beginPath();
+      ctx.ellipse(-i * (r * 0.25), 0, r * 0.2, r * 0.35 - i * 2, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Đôi càng to khỏe phía trước
+    ctx.fillStyle = isHit ? '#ff5252' : this.config.color;
+    [-r * 0.5, r * 0.5].forEach(offsetY => {
+      ctx.beginPath();
+      ctx.ellipse(r * 0.8, offsetY, r * 0.4, r * 0.22, 0.3 * Math.sign(offsetY), 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // Thân mai tôm
+    ctx.beginPath();
+    ctx.ellipse(0, 0, r * 0.6, r * 0.45, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Đôi râu dài phất phơ
+    ctx.strokeStyle = '#ffcc80';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(r * 0.5, -5);
+    ctx.lineTo(r * 1.5, -25);
+    ctx.moveTo(r * 0.5, 5);
+    ctx.lineTo(r * 1.5, 25);
+    ctx.stroke();
+  }
+
+  // 5. Cá Mập Đầu Búa (Hammerhead Shark)
+  renderHammerhead(ctx, isHit, tailWiggle) {
+    const r = this.radius;
+
+    // Đuôi cá mập quẫy
+    ctx.save();
+    ctx.translate(-r * 0.8, 0);
+    ctx.rotate(tailWiggle);
+    ctx.fillStyle = isHit ? '#ffffff' : this.config.color;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(-r * 0.6, -r * 0.6);
+    ctx.lineTo(-r * 0.3, 0);
+    ctx.lineTo(-r * 0.6, r * 0.6);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    // Thân cá mập
+    ctx.fillStyle = isHit ? '#ff5252' : this.config.color;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, r * 0.85, r * 0.38, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Đầu búa nằm ngang T-bar đặc trưng
+    ctx.fillStyle = isHit ? '#ffffff' : this.config.accent;
+    ctx.beginPath();
+    ctx.roundRect(r * 0.6, -r * 0.7, r * 0.3, r * 1.4, 6);
+    ctx.fill();
+
+    // 2 mắt nằm ở 2 đầu thanh búa
+    ctx.fillStyle = '#000000';
+    ctx.beginPath();
+    ctx.arc(r * 0.75, -r * 0.6, 3, 0, Math.PI * 2);
+    ctx.arc(r * 0.75, r * 0.6, 3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // 6. Cóc Vàng Thiềm Thừ (Boss May Mắn x150)
+  renderGoldenToad(ctx, isHit, tailWiggle) {
+    const r = this.radius;
+
+    // Thân cóc tròn vàng óng
+    const grad = ctx.createRadialGradient(0, 0, 5, 0, 0, r);
+    grad.addColorStop(0, isHit ? '#ffffff' : '#fff59d');
+    grad.addColorStop(0.7, isHit ? '#ff5252' : '#ffd700');
+    grad.addColorStop(1, '#ff6f00');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, r * 0.8, r * 0.65, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Các nốt sần ngọc đỏ trên lưng
+    ctx.fillStyle = '#d50000';
+    [[-15, -12], [0, -18], [15, -10], [-10, 10], [10, 12]].forEach(([px, py]) => {
+      ctx.beginPath();
+      ctx.arc(px, py, 4, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // Đồng tiền vàng ngậm ở miệng
+    ctx.fillStyle = '#fff176';
+    ctx.strokeStyle = '#f57f17';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(r * 0.75, 0, 14, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Lỗ vuông giữa đồng tiền
+    ctx.fillStyle = '#ff6f00';
+    ctx.fillRect(r * 0.75 - 4, -4, 8, 8);
+
+    // Mắt cóc vàng ngọc đỏ
+    ctx.fillStyle = '#d50000';
+    ctx.beginPath();
+    ctx.arc(r * 0.4, -r * 0.4, 7, 0, Math.PI * 2);
+    ctx.arc(r * 0.4, r * 0.4, 7, 0, Math.PI * 2);
     ctx.fill();
   }
 }

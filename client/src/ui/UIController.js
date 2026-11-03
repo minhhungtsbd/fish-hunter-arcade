@@ -8,6 +8,7 @@ import { FISH_CONFIGS } from '../entities/Fish.js';
 export class UIController {
   constructor(gameEngine) {
     this.game = gameEngine;
+    this.game.ui = this;
     this.roomCode = this.getOrGenerateRoomCode();
     this.initDOM();
     this.bindEvents();
@@ -202,6 +203,26 @@ export class UIController {
         this.updateHUD();
       });
     }
+
+    // 11. Chọn độ khó (Dễ / Trung Bình / Khó)
+    const diffSelect = document.getElementById('difficulty-select');
+    if (diffSelect) {
+      diffSelect.addEventListener('change', (e) => {
+        this.game.difficulty = e.target.value;
+        const labelMap = {
+          EASY: 'DỄ (Thư giãn, dễ bắt)',
+          NORMAL: 'TRUNG BÌNH (Chuẩn Siêu Thị)',
+          HARD: 'KHÓ (Thử thách sinh tồn)',
+        };
+        this.game.particles.addFloatingText(
+          this.game.width / 2,
+          this.game.height / 2 - 30,
+          `🎮 ĐỘ KHÓ: ${labelMap[this.game.difficulty]}`,
+          '#ffd700',
+          22
+        );
+      });
+    }
   }
 
   updateHUD() {
@@ -211,6 +232,11 @@ export class UIController {
     const betDisplay = document.getElementById('bet-value');
     if (betDisplay) {
       betDisplay.innerText = cannon.bet;
+    }
+
+    const coinsDisplay = document.getElementById('user-coins-display');
+    if (coinsDisplay) {
+      coinsDisplay.innerText = Math.max(0, Math.floor(cannon.coins)).toLocaleString('vi-VN');
     }
   }
 }

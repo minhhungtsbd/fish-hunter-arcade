@@ -34,6 +34,8 @@ export class GameEngine {
     this.network = null; // Sẽ được gán từ NetworkManager
 
     this.localSlotId = 0; // Mặc định người chơi ngồi Slot 0
+    this.difficulty = 'NORMAL'; // Chế độ: 'EASY' | 'NORMAL' | 'HARD'
+    this.ui = null; // Sẽ được gán từ UIController
     this.isRunning = false;
     this.lastTime = performance.now();
 
@@ -116,6 +118,7 @@ export class GameEngine {
       const bullet = localCannon.shoot();
       if (bullet) {
         this.bullets.push(bullet);
+        if (this.ui) this.ui.updateHUD();
       }
     };
 
@@ -131,11 +134,16 @@ export class GameEngine {
 
       if (e.code === 'Space') {
         const bullet = localCannon.shoot();
-        if (bullet) this.bullets.push(bullet);
+        if (bullet) {
+          this.bullets.push(bullet);
+          if (this.ui) this.ui.updateHUD();
+        }
       } else if (e.code === 'ArrowUp' || e.code === 'KeyW' || e.key === '+') {
         localCannon.changeBet(1);
+        if (this.ui) this.ui.updateHUD();
       } else if (e.code === 'ArrowDown' || e.code === 'KeyS' || e.key === '-') {
         localCannon.changeBet(-1);
+        if (this.ui) this.ui.updateHUD();
       } else if (e.code === 'KeyA') {
         localCannon.autoFire = !localCannon.autoFire;
         this.particles.addFloatingText(
@@ -237,10 +245,18 @@ export class GameEngine {
     this.particles.update(dt, this.width, this.height);
   }
 
-  // Tính toán sát thương & bắt cá
+  // Tính toán sát thương & bắt cá theo Chế độ độ khó
   applyNetDamage(net) {
     const cannon = this.cannons[net.slotId];
     if (!cannon) return;
+
+    // Cấu hình tỷ lệ cân bằng theo 3 cấp độ: Dễ, Trung bình, Khó
+    const diffConfigs = {
+      EASY: { luckDiv: 25, dmgMult: 1.2 },
+      NORMAL: { luckDiv: 55, dmgMult: 1.0 },
+      HARD: { luckDiv: 110, dmgMult: 0.8 },
+    };
+    const diff = diffConfigs[this.difficulty] || diffConfigs.NORMAL;
 
     for (const fish of this.spawner.fishes) {
       if (fish.isDead) continue;
@@ -248,12 +264,13 @@ export class GameEngine {
       if (dist <= net.currentRadius + fish.radius) {
         this.audio.playHit();
 
-        // Công thức sát thương và tỷ lệ bắt cá chuẩn máy siêu thị
-        const damage = Math.max(1, Math.floor(net.bet / 10));
+        // Sát thương theo cấp độ đạn và chế độ chơi
+        const damage = Math.max(1, Math.round((net.bet / 10) * diff.dmgMult));
         const isDeadByHp = fish.takeDamage(damage);
 
-        // Tỷ lệ trúng hên xui (Lucky catch)
-        const luckRoll = Math.random() < (net.bet / (fish.multiplier * 16));
+        // Tỷ lệ may mắn trúng lưới bắt ngay (càng khó tỷ lệ càng giảm)
+        const luckChance = (net.bet / (fish.multiplier * diff.luckDiv));
+        const luckRoll = Math.random() < luckChance;
 
         if (isDeadByHp || luckRoll) {
           this.handleFishKilled(fish, cannon, net.bet);
@@ -267,38 +284,44 @@ export class GameEngine {
     const rewardCoins = fish.multiplier * betUsed;
     cannon.coins += rewardCoins;
 
+    // Cập nhật giao diện Xu ngay lập tức
+    if (this.ui) this.ui.updateHUD();
+
     // Hiệu ứng xu bay về nòng pháo
     const valueStr = `+${rewardCoins.toLocaleString('vi-VN')} Xu`;
     this.particles.addCoinFountain(fish.x, fish.y, cannon.x, cannon.y, rewardCoins, valueStr);
     this.audio.playCoin(fish.multiplier >= 20);
 
-    // Kỹ năng đặc biệt: Cá Chình Sét (Chain Lightning)
+    // Kỹ năng đặc biệt: Cá Chình Sét (Chain Lightning - giật tối đa 2 cá lân cận)
     if (fish.typeKey === 'LIGHTNING_EEL') {
       this.audio.playLightning();
       this.particles.triggerScreenShake(8);
-      const nearbyFishes = this.spawner.fishes.filter(f => !f.isDead && Math.hypot(f.x - fish.x, f.y - fish.y) < 320);
-      nearbyFishes.slice(0, 4).forEach(targetFish => {
+      const nearbyFishes = this.spawner.fishes.filter(f => !f.isDead && Math.hypot(f.x - fish.x, f.y - fish.y) < 280);
+      nearbyFishes.slice(0, 2).forEach(targetFish => {
         this.particles.addLightning(fish.x, fish.y, targetFish.x, targetFish.y, '#00ffff');
         targetFish.isDead = true;
         const extraReward = targetFish.multiplier * betUsed;
         cannon.coins += extraReward;
         this.particles.addCoinFountain(targetFish.x, targetFish.y, cannon.x, cannon.y, extraReward, `+${extraReward}`);
       });
+      if (this.ui) this.ui.updateHUD();
     }
 
-    // Kỹ năng đặc biệt: Cua Mang Bom (Bomb Crab)
+    // Kỹ năng đặc biệt: Cua Mang Bom (Bomb Crab - nổ quét sạch cá nhỏ & trung)
     if (fish.typeKey === 'BOMB_CRAB') {
       this.audio.playBomb();
-      this.particles.triggerScreenShake(20);
-      this.particles.addFloatingText(this.width / 2, this.height / 2, '💥 BÙM! QUÉT SẠCH MÀN HÌNH!', '#ff1744', 30);
+      this.particles.triggerScreenShake(18);
+      this.particles.addFloatingText(this.width / 2, this.height / 2, '💥 BÙM! NỔ BOM QUÉT MÀN HÌNH!', '#ff1744', 28);
       this.spawner.fishes.forEach(targetFish => {
-        if (!targetFish.isDead && !targetFish.config.isBoss) {
+        // Chỉ nổ các con cá nhỏ & trung (multiplier <= 15) để tránh lạm phát xu quá đà
+        if (!targetFish.isDead && !targetFish.config.isBoss && targetFish.multiplier <= 15) {
           targetFish.isDead = true;
           const extraReward = targetFish.multiplier * betUsed;
           cannon.coins += extraReward;
           this.particles.addCoinFountain(targetFish.x, targetFish.y, cannon.x, cannon.y, extraReward);
         }
       });
+      if (this.ui) this.ui.updateHUD();
     }
 
     // Kỹ năng Boss: Rồng Vàng hoặc Cá Mập Vàng

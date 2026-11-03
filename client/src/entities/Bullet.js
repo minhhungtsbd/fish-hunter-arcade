@@ -20,7 +20,7 @@ export class Bullet {
     this.vy = Math.sin(angle) * speed;
 
     this.radius = bet >= 100 ? 7 : 5;
-    this.bouncesRemaining = 3; // Đạn nảy viền tối đa 3 lần
+    this.bouncesRemaining = 1; // Đạn chỉ phản xạ viền đúng 1 lần
     this.isDead = false;
     this.trail = [];
   }

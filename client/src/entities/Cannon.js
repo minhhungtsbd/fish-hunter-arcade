@@ -101,6 +101,11 @@ export class Cannon {
     this.shootCooldown = this.fireRateMs;
     this.recoil = 12; // Giật nòng 12px
 
+    // Cập nhật số xu hiển thị ngay lập tức
+    if (this.game.ui) {
+      this.game.ui.updateHUD();
+    }
+
     // Tính tọa độ đầu nòng súng
     const barrelLength = 48;
     const tipX = this.x + Math.cos(this.angle) * barrelLength;
