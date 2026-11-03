@@ -7,7 +7,7 @@
  */
 import { Bullet } from './Bullet.js';
 
-export const BET_STEPS = [10, 20, 50, 100, 200, 500, 1000];
+export const BET_STEPS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 30, 50, 75, 100, 200, 500, 1000];
 
 export const SLOT_CONFIGS = [
   { id: 0, name: 'Người Chơi 1', color: '#00e5ff', posRatio: { x: 0.28, y: 1.0 }, defaultAngle: -Math.PI / 2 },
@@ -29,7 +29,7 @@ export class Cannon {
     this.playerName = this.config.name;
 
     this.coins = 10000;             // 10,000 xu ban đầu
-    this.betIndex = 0;              // Mức cược ban đầu = 10 xu
+    this.betIndex = 9;              // Mức cược ban đầu = 10 xu (cho phép chọn từ 1 đến 1000)
     this.bet = BET_STEPS[this.betIndex];
 
     this.energy = 0;                // Năng lượng tích nộ Buzz Bom (0 -> 100%)
@@ -124,7 +124,10 @@ export class Cannon {
   shoot() {
     if (!this.canShoot()) {
       if (this.coins < this.bet && this.isLocal) {
-        this.game.particles.addFloatingText(this.x, this.y - 40, 'HẾT XU! NHẬN THÊM XU', '#ff1744', 20);
+        this.game.particles.addFloatingText(this.x, this.y - 40, 'HẾT XU! GIẢI ĐỐ NHẬN XU MIỄN PHÍ', '#ff1744', 20);
+        if (this.game.ui) {
+          this.game.ui.openQuizModal();
+        }
       }
       return null;
     }

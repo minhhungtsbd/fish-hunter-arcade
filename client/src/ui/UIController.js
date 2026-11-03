@@ -4,15 +4,23 @@
  * và chia sẻ phòng chơi cho 4 người.
  */
 import { FISH_CONFIGS } from '../entities/Fish.js';
+import { QuizManager } from './QuizManager.js';
 
 export class UIController {
   constructor(gameEngine) {
     this.game = gameEngine;
     this.game.ui = this;
     this.roomCode = this.getOrGenerateRoomCode();
+    this.quiz = new QuizManager(gameEngine);
     this.initDOM();
     this.bindEvents();
     this.updateHUD();
+  }
+
+  openQuizModal() {
+    if (this.quiz) {
+      this.quiz.open();
+    }
   }
 
   getOrGenerateRoomCode() {
@@ -118,15 +126,11 @@ export class UIController {
       });
     }
 
-    // 6. Nút Nạp 5,000 Xu miễn phí
+    // 6. Nút Cứu trợ Xu (Giải đố Toán & Tiếng Anh để nhận xu)
     const btnFreeCoins = document.getElementById('btn-free-coins');
     if (btnFreeCoins) {
       btnFreeCoins.addEventListener('click', () => {
-        const cannon = this.game.cannons[this.game.localSlotId];
-        cannon.coins += 5000;
-        this.game.audio.playCoin(true);
-        this.game.particles.addFloatingText(cannon.x, cannon.y - 40, '+5,000 XU MIỄN PHÍ!', '#ffd700', 22);
-        this.updateHUD();
+        this.openQuizModal();
       });
     }
 

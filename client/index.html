@@ -84,7 +84,7 @@
 
       <!-- Tự động bắn & Nạp xu miễn phí -->
       <button id="btn-auto-fire" class="arcade-btn" title="Bật/Tắt chế độ tự động bắn liên tục (Phím A)"><span class="btn-icon">⚡</span><span class="btn-text"> Tự động</span></button>
-      <button id="btn-free-coins" class="arcade-btn gold" title="Nhận ngay 5,000 xu miễn phí">+5k Xu</button>
+      <button id="btn-free-coins" class="arcade-btn gold" title="Giải đố Toán & Tiếng Anh để nhận 2,000 - 3,000 xu miễn phí!">🧠 Nhận Xu</button>
       <!-- Nút Bắn Nhanh dành riêng cho Mobile -->
       <button id="btn-mobile-fire" class="mobile-shoot-btn" title="Chạm để bắn liên thanh">🎯 BẮN</button>
     </footer>
@@ -132,6 +132,39 @@
         </div>
         <div style="font-size: 12px; color: #90a4ae; line-height: 1.5; margin-top: 12px;">
           <p>💡 <em>Mẹo thử nghiệm nhanh:</em> Bạn có thể mở 2 tab trình duyệt cùng lúc trên máy tính, tab 1 chọn Ghế 1, tab 2 chọn Ghế 2 để thấy 2 nòng pháo bắn cá cùng nhau trong thời gian thực!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hộp thoại Cứu Trợ Xu: Thử tài Toán học & Tiếng Anh Nhận Xu -->
+    <div id="modal-quiz" class="modal-overlay">
+      <div class="modal-card quiz-card">
+        <div class="modal-header">
+          <div class="modal-title">🧠 CỨU TRỢ XU: THỬ TÀI TRÍ TUỆ</div>
+          <button id="close-quiz" class="close-btn">&times;</button>
+        </div>
+
+        <p class="quiz-subtext">Trả lời đúng để nhận <strong>+2,000 đến +3,000 Xu</strong> miễn phí! Trả lời sai sẽ tự động đổi câu khác.</p>
+
+        <!-- Khung Câu Hỏi -->
+        <div id="quiz-question-box" class="quiz-question-box">
+          <div id="quiz-icon-display" class="quiz-icon-display">🐟</div>
+          <div id="quiz-prompt-text" class="quiz-prompt-text">Hình trên có tên tiếng Anh là gì?</div>
+        </div>
+
+        <!-- Danh sách 4 Lựa chọn -->
+        <div id="quiz-options-grid" class="quiz-options-grid"></div>
+
+        <!-- Thông báo Trạng thái phản hồi -->
+        <div id="quiz-feedback" class="quiz-feedback"></div>
+
+        <!-- Khung Chúc mừng Thành công -->
+        <div id="quiz-success-box" class="quiz-success-box" style="display: none;">
+          <div class="quiz-reward-text">🎉 CHÍNH XÁC! BẠN NHẬN ĐƯỢC <span id="quiz-reward-amount">+3,000</span> XU!</div>
+          <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
+            <button id="btn-quiz-continue-game" class="arcade-btn gold" style="padding: 10px 18px; font-size: 13px;">🎮 Vào Bắn Cá Tiếp</button>
+            <button id="btn-quiz-another" class="arcade-btn" style="padding: 10px 18px; font-size: 13px;">🧠 Đố Thêm Câu Nữa</button>
+          </div>
         </div>
       </div>
     </div>

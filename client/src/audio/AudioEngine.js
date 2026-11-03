@@ -131,6 +131,46 @@ export class AudioEngine {
     } catch (_) {}
   }
 
+  // Tiếng trả lời đúng Quiz nhận xu
+  playCorrect() {
+    if (this.isMuted || !this.ctx) return;
+    try {
+      [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+        const now = this.ctx.currentTime + idx * 0.08;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now);
+        gain.gain.setValueAtTime(0.25 * this.masterVolume, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.22);
+      });
+    } catch (_) {}
+  }
+
+  // Tiếng trả lời sai Quiz (đổi câu khác)
+  playWrong() {
+    if (this.isMuted || !this.ctx) return;
+    try {
+      const now = this.ctx.currentTime;
+      [220, 180].forEach((freq, idx) => {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(freq, now + idx * 0.12);
+        gain.gain.setValueAtTime(0.18 * this.masterVolume, now + idx * 0.12);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.1);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now + idx * 0.12);
+        osc.stop(now + idx * 0.12 + 0.11);
+      });
+    } catch (_) {}
+  }
+
   // Tiếng bom nổ / Boss bị tiêu diệt (Boom bass rung chuyển)
   playBomb() {
     if (this.isMuted || !this.ctx) return;
