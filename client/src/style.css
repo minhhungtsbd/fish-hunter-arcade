@@ -668,6 +668,124 @@ body, html {
 }
 
 /* =========================================================
+   BẢNG CÀI ĐẶT GAME TOÀN DIỆN (SETTINGS MODAL & TOP BUTTON)
+   ========================================================= */
+
+.settings-btn {
+  background: linear-gradient(135deg, #0288d1 0%, #01579b 100%);
+  border: 1px solid #00e5ff;
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.4);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 7px 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.settings-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.7);
+  background: linear-gradient(135deg, #039be5 0%, #0277bd 100%);
+}
+
+.settings-card {
+  max-width: 580px;
+  background: linear-gradient(145deg, #071e33 0%, #031321 100%);
+  border: 1px solid #00e5ff;
+  box-shadow: 0 0 35px rgba(0, 229, 255, 0.35);
+  border-radius: 18px;
+  padding: 22px;
+}
+
+.settings-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settings-group {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.settings-group:hover {
+  background: rgba(0, 229, 255, 0.06);
+  border-color: rgba(0, 229, 255, 0.3);
+}
+
+.settings-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.settings-label .icon {
+  font-size: 22px;
+  min-width: 28px;
+  text-align: center;
+}
+
+.settings-label .title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.settings-label .desc {
+  font-size: 11px;
+  color: #90a4ae;
+  margin-top: 2px;
+}
+
+.settings-control {
+  min-width: 180px;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #092032;
+  border: 1px solid #00e5ff;
+  border-radius: 8px;
+  color: #ffffff;
+  outline: none;
+  cursor: pointer;
+}
+
+.settings-toggle {
+  min-width: 140px;
+  padding: 8px 12px;
+  font-size: 12px;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.settings-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.settings-action-btn {
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 12px;
+  border-radius: 10px;
+}
+
+/* =========================================================
    TỐI ƯU HÓA GIAO DIỆN MÀN HÌNH ĐIỆN THOẠI (RESPONSIVE MOBILE)
    ========================================================= */
 
@@ -762,5 +880,40 @@ body, html {
   .fish-grid {
     grid-template-columns: 1fr;
     gap: 6px;
+  }
+
+  /* Tối ưu bảng cài đặt trên màn hình điện thoại */
+  .settings-card {
+    padding: 14px;
+  }
+  .settings-group {
+    padding: 8px 10px;
+  }
+  .settings-label .title {
+    font-size: 12px;
+  }
+  .settings-label .desc {
+    display: none;
+  }
+  .settings-control {
+    min-width: 125px;
+    font-size: 11px;
+    padding: 5px 8px;
+  }
+  .settings-toggle {
+    min-width: 110px;
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+  .settings-actions-grid {
+    gap: 8px;
+  }
+  .settings-action-btn {
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+  .settings-btn {
+    padding: 5px 10px;
+    font-size: 11px;
   }
 }

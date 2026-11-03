@@ -101,7 +101,8 @@ export class UIController {
       btnSound.addEventListener('click', () => {
         this.game.audio.init();
         const isMuted = this.game.audio.toggleMute();
-        btnSound.innerText = isMuted ? '🔇 Tắt tiếng' : '🔊 Âm thanh';
+        btnSound.innerHTML = isMuted ? '<span class="btn-icon">🔇</span> Âm thanh: TẮT' : '<span class="btn-icon">🔊</span> Âm thanh: BẬT';
+        btnSound.classList.toggle('active', !isMuted);
       });
     }
 
@@ -111,7 +112,7 @@ export class UIController {
       btnMusic.addEventListener('click', () => {
         this.game.audio.init();
         const isPlaying = this.game.audio.toggleMusic();
-        btnMusic.innerText = isPlaying ? '🎵 Nhạc: Bật' : '🎵 Nhạc: Tắt';
+        btnMusic.innerHTML = isPlaying ? '<span class="btn-icon">🎵</span> Nhạc nền: BẬT' : '<span class="btn-icon">🎵</span> Nhạc nền: TẮT';
         btnMusic.classList.toggle('active', isPlaying);
       });
     }
@@ -131,6 +132,37 @@ export class UIController {
     if (btnFreeCoins) {
       btnFreeCoins.addEventListener('click', () => {
         this.openQuizModal();
+      });
+    }
+
+    const btnSettingsQuiz = document.getElementById('btn-settings-quiz');
+    if (btnSettingsQuiz) {
+      btnSettingsQuiz.addEventListener('click', () => {
+        const modalSettings = document.getElementById('modal-settings');
+        if (modalSettings) modalSettings.classList.remove('open');
+        this.openQuizModal();
+      });
+    }
+
+    // 6.5 Mở/Đóng Bảng Cài Đặt Game Toàn Diện (Settings Modal)
+    const btnOpenSettings = document.getElementById('btn-open-settings');
+    const modalSettings = document.getElementById('modal-settings');
+    const closeSettings = document.getElementById('close-settings');
+    const btnCloseSettingsModal = document.getElementById('btn-close-settings-modal');
+
+    if (btnOpenSettings && modalSettings) {
+      btnOpenSettings.addEventListener('click', () => {
+        modalSettings.classList.add('open');
+      });
+    }
+    if (closeSettings && modalSettings) {
+      closeSettings.addEventListener('click', () => {
+        modalSettings.classList.remove('open');
+      });
+    }
+    if (btnCloseSettingsModal && modalSettings) {
+      btnCloseSettingsModal.addEventListener('click', () => {
+        modalSettings.classList.remove('open');
       });
     }
 
@@ -181,21 +213,32 @@ export class UIController {
       });
     }
 
-    // 10. Chọn ghế (Ghế 1, 2, 3, 4)
+    // 10. Chọn ghế (Ghế 1, 2, 3, 4) - Đồng bộ cả thanh dưới và modal cài đặt
     const seatSelect = document.getElementById('seat-select');
-    if (seatSelect) {
-      // Đọc query param `slot` nếu có
-      const urlParams = new URLSearchParams(window.location.search);
-      const slotParam = parseInt(urlParams.get('slot'), 10);
-      if (!isNaN(slotParam) && slotParam >= 0 && slotParam <= 3) {
-        seatSelect.value = slotParam;
-        this.game.setLocalSlot(slotParam);
-      }
+    const settingsSeatSelect = document.getElementById('settings-seat-select');
 
+    const updateSeat = (slot) => {
+      this.game.setLocalSlot(slot);
+      if (seatSelect) seatSelect.value = slot;
+      if (settingsSeatSelect) settingsSeatSelect.value = slot;
+      this.updateHUD();
+    };
+
+    // Đọc query param `slot` nếu có
+    const urlParams = new URLSearchParams(window.location.search);
+    const slotParam = parseInt(urlParams.get('slot'), 10);
+    if (!isNaN(slotParam) && slotParam >= 0 && slotParam <= 3) {
+      updateSeat(slotParam);
+    }
+
+    if (seatSelect) {
       seatSelect.addEventListener('change', (e) => {
-        const slot = parseInt(e.target.value, 10);
-        this.game.setLocalSlot(slot);
-        this.updateHUD();
+        updateSeat(parseInt(e.target.value, 10));
+      });
+    }
+    if (settingsSeatSelect) {
+      settingsSeatSelect.addEventListener('change', (e) => {
+        updateSeat(parseInt(e.target.value, 10));
       });
     }
 

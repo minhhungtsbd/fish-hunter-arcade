@@ -11,31 +11,19 @@
   <div id="game-container">
     <canvas id="game-canvas"></canvas>
 
-    <!-- Thanh công cụ trên cùng -->
+    <!-- Thanh công cụ trên cùng tối giản: Hoàn toàn không che súng và người chơi phía trên -->
     <header class="top-bar">
       <div class="brand">
         <span style="font-size: 18px;">🌊</span>
-        <div class="brand-title">BẮN CÁ ĂN XU 4P</div>
+        <div class="brand-title">BẮN CÁ 4P</div>
         <div id="room-badge-text" class="room-badge">#PHÒNG: CA8888</div>
       </div>
 
       <div class="top-controls">
-        <select id="difficulty-select" class="arcade-select" title="Chọn chế độ độ khó: Dễ, Trung bình, Khó">
-          <option value="EASY">🎯 Dễ</option>
-          <option value="NORMAL" selected>⚖️ Chuẩn</option>
-          <option value="HARD">🔥 Khó</option>
-        </select>
-        <select id="bot-count-select" class="arcade-select" title="Tùy chọn số lượng Bot chơi cùng (0, 1, 2 hoặc 3 Bot)">
-          <option value="0">🤖 0 Bot</option>
-          <option value="1">🤖 1 Bot</option>
-          <option value="2">🤖 2 Bot</option>
-          <option value="3" selected>🤖 3 Bot</option>
-        </select>
-        <button id="btn-sound" class="arcade-btn" title="Bật/Tắt âm thanh hiệu ứng"><span class="btn-icon">🔊</span><span class="btn-text"> Âm thanh</span></button>
-        <button id="btn-music" class="arcade-btn" title="Bật/Tắt nhạc nền đại dương"><span class="btn-icon">🎵</span><span class="btn-text"> Nhạc nền</span></button>
-        <button id="btn-paytable" class="arcade-btn" title="Xem danh sách cá & thưởng"><span class="btn-icon">📖</span><span class="btn-text"> Bảng thưởng</span></button>
-        <button id="btn-invite" class="arcade-btn" title="Mời bạn bè cùng chơi"><span class="btn-icon">👥</span><span class="btn-text"> Mời bạn</span></button>
-        <button id="btn-fullscreen" class="arcade-btn" title="Toàn màn hình"><span class="btn-icon">⛶</span></button>
+        <button id="btn-open-settings" class="arcade-btn settings-btn" title="Mở bảng Cài đặt & Tùy chọn game">
+          <span class="btn-icon">⚙️</span>
+          <span class="btn-text"> Cài Đặt</span>
+        </button>
       </div>
     </header>
 
@@ -96,6 +84,111 @@
         <div class="rotate-title">XOAY NGANG ĐIỆN THOẠI</div>
         <div class="rotate-desc">Trải nghiệm bắn cá siêu thị tuyệt vời nhất khi xoay ngang màn hình điện thoại!</div>
         <button id="btn-close-rotate" class="arcade-btn gold" style="margin-top: 12px; width: 100%; justify-content: center;">Vẫn chơi màn hình dọc</button>
+      </div>
+    </div>
+
+    <!-- Hộp thoại Cài Đặt Game Toàn Diện (Settings Modal) -->
+    <div id="modal-settings" class="modal-overlay">
+      <div class="modal-card settings-card">
+        <div class="modal-header">
+          <div class="modal-title">⚙️ CÀI ĐẶT TRÒ CHƠI</div>
+          <button id="close-settings" class="close-btn">&times;</button>
+        </div>
+
+        <div class="settings-body">
+          <!-- Nhóm 1: Độ khó & Cân bằng -->
+          <div class="settings-group">
+            <div class="settings-label">
+              <span class="icon">🎯</span>
+              <div>
+                <div class="title">Độ Khó Trò Chơi</div>
+                <div class="desc">Cân bằng tỷ lệ bắt cá và độ thử thách</div>
+              </div>
+            </div>
+            <select id="difficulty-select" class="arcade-select settings-control">
+              <option value="EASY">🎯 Dễ (Thư giãn, tỷ lệ bắt cao)</option>
+              <option value="NORMAL" selected>⚖️ Chuẩn (Chuẩn máy siêu thị)</option>
+              <option value="HARD">🔥 Khó (Thử thách sinh tồn cao)</option>
+            </select>
+          </div>
+
+          <!-- Nhóm 2: Số lượng AI Bot chơi cùng -->
+          <div class="settings-group">
+            <div class="settings-label">
+              <span class="icon">🤖</span>
+              <div>
+                <div class="title">Số Lượng AI Bot</div>
+                <div class="desc">Tùy chọn số lượng máy tự động bắn cùng bạn</div>
+              </div>
+            </div>
+            <select id="bot-count-select" class="arcade-select settings-control">
+              <option value="0">🤖 0 Bot (Chơi 1 mình / Chỉ người thật)</option>
+              <option value="1">🤖 1 AI Bot</option>
+              <option value="2">🤖 2 AI Bot</option>
+              <option value="3" selected>🤖 3 AI Bot (Đầy bàn 4 người)</option>
+            </select>
+          </div>
+
+          <!-- Nhóm 3: Đổi vị trí ghế ngồi của người chơi -->
+          <div class="settings-group">
+            <div class="settings-label">
+              <span class="icon">🪑</span>
+              <div>
+                <div class="title">Vị Trí Ghế Của Bạn</div>
+                <div class="desc">Chuyển sang 1 trong 4 khẩu pháo trên bàn</div>
+              </div>
+            </div>
+            <select id="settings-seat-select" class="arcade-select settings-control">
+              <option value="0">Ghế 1 (Dưới Trái - Pháo Xanh Dương)</option>
+              <option value="1">Ghế 2 (Dưới Phải - Pháo Cam)</option>
+              <option value="2">Ghế 3 (Trên Trái - Pháo Tím)</option>
+              <option value="3">Ghế 4 (Trên Phải - Pháo Xanh Lá)</option>
+            </select>
+          </div>
+
+          <!-- Nhóm 4: Âm thanh hiệu ứng & Nhạc nền -->
+          <div class="settings-group">
+            <div class="settings-label">
+              <span class="icon">🔊</span>
+              <div>
+                <div class="title">Âm Thanh Hiệu Ứng</div>
+                <div class="desc">Tiếng bắn, lưới nổ, cá trúng đạn, xu rơi</div>
+              </div>
+            </div>
+            <button id="btn-sound" class="arcade-btn settings-toggle"><span class="btn-icon">🔊</span> Âm thanh: BẬT</button>
+          </div>
+
+          <div class="settings-group">
+            <div class="settings-label">
+              <span class="icon">🎵</span>
+              <div>
+                <div class="title">Nhạc Nền Đại Dương</div>
+                <div class="desc">Giai điệu thư giãn hòa âm dưới biển sâu</div>
+              </div>
+            </div>
+            <button id="btn-music" class="arcade-btn settings-toggle"><span class="btn-icon">🎵</span> Nhạc nền: TẮT</button>
+          </div>
+
+          <!-- Nhóm 5: Các tiện ích game -->
+          <div class="settings-actions-grid">
+            <button id="btn-paytable" class="arcade-btn settings-action-btn" title="Xem hệ số thưởng 16 loài cá">
+              <span class="btn-icon">📖</span> Bảng Thưởng
+            </button>
+            <button id="btn-invite" class="arcade-btn settings-action-btn" title="Mời bạn bè cùng chơi phòng">
+              <span class="btn-icon">👥</span> Mời Bạn Bè
+            </button>
+            <button id="btn-fullscreen" class="arcade-btn settings-action-btn" title="Bật/Tắt Toàn Màn Hình">
+              <span class="btn-icon">⛶</span> Toàn Màn Hình
+            </button>
+            <button id="btn-settings-quiz" class="arcade-btn gold settings-action-btn" title="Giải đố nhận 2,000 - 3,000 xu">
+              <span class="btn-icon">🧠</span> Cứu Trợ Xu
+            </button>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="margin-top: 18px; display: flex; justify-content: flex-end;">
+          <button id="btn-close-settings-modal" class="arcade-btn gold" style="padding: 10px 24px; font-weight: bold; border-radius: 10px;">✓ Xong & Trở Về Game</button>
+        </div>
       </div>
     </div>
 
