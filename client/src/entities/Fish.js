@@ -10,7 +10,7 @@ export const FISH_CONFIGS = {
     name: 'Cá Hề Nemo',
     multiplier: 2,
     hp: 2,
-    baseSpeed: 1.8,
+    baseSpeed: 1.1,
     radius: 18,
     color: '#ff6d00',
     accent: '#ffffff',
@@ -19,7 +19,7 @@ export const FISH_CONFIGS = {
     name: 'Cá Bướm Vàng',
     multiplier: 3,
     hp: 3,
-    baseSpeed: 1.5,
+    baseSpeed: 1.0,
     radius: 22,
     color: '#ffd600',
     accent: '#00b0ff',
@@ -28,7 +28,7 @@ export const FISH_CONFIGS = {
     name: 'Cá Nóc Gai',
     multiplier: 5,
     hp: 5,
-    baseSpeed: 1.2,
+    baseSpeed: 0.85,
     radius: 26,
     color: '#00e676',
     accent: '#004d40',
@@ -37,7 +37,7 @@ export const FISH_CONFIGS = {
     name: 'Sứa Phát Quang',
     multiplier: 8,
     hp: 7,
-    baseSpeed: 0.9,
+    baseSpeed: 0.65,
     radius: 30,
     color: '#e040fb',
     accent: '#80d8ff',
@@ -46,7 +46,7 @@ export const FISH_CONFIGS = {
     name: 'Rùa Biển Cổ',
     multiplier: 10,
     hp: 12,
-    baseSpeed: 0.9,
+    baseSpeed: 0.6,
     radius: 36,
     color: '#2e7d32',
     accent: '#81c784',
@@ -55,7 +55,7 @@ export const FISH_CONFIGS = {
     name: 'Cá Kiếm Đại Dương',
     multiplier: 15,
     hp: 16,
-    baseSpeed: 1.4,
+    baseSpeed: 0.95,
     radius: 44,
     color: '#1976d2',
     accent: '#00e5ff',
@@ -64,7 +64,7 @@ export const FISH_CONFIGS = {
     name: 'Cá Đuối Khổng Lồ',
     multiplier: 20,
     hp: 24,
-    baseSpeed: 1.1,
+    baseSpeed: 0.75,
     radius: 46,
     color: '#0288d1',
     accent: '#b3e5fc',
@@ -73,7 +73,7 @@ export const FISH_CONFIGS = {
     name: 'Cá Lồng Đèn Biển Sâu',
     multiplier: 25,
     hp: 26,
-    baseSpeed: 1.0,
+    baseSpeed: 0.7,
     radius: 40,
     color: '#283593',
     accent: '#ffd600',
@@ -82,7 +82,7 @@ export const FISH_CONFIGS = {
     name: 'Tôm Hùm Hoàng Gia',
     multiplier: 35,
     hp: 36,
-    baseSpeed: 0.85,
+    baseSpeed: 0.65,
     radius: 42,
     color: '#e64a19',
     accent: '#ffab91',
@@ -91,7 +91,7 @@ export const FISH_CONFIGS = {
     name: 'Bạch Tuộc Tím',
     multiplier: 40,
     hp: 45,
-    baseSpeed: 0.8,
+    baseSpeed: 0.6,
     radius: 52,
     color: '#7b1fa2',
     accent: '#ea80fc',
@@ -100,7 +100,7 @@ export const FISH_CONFIGS = {
     name: 'Cá Chình Sét',
     multiplier: 50,
     hp: 35,
-    baseSpeed: 1.5,
+    baseSpeed: 0.95,
     radius: 38,
     color: '#00ffff',
     accent: '#ffff00',
@@ -111,7 +111,7 @@ export const FISH_CONFIGS = {
     name: 'Cua Mang Bom',
     multiplier: 60,
     hp: 40,
-    baseSpeed: 0.9,
+    baseSpeed: 0.65,
     radius: 42,
     color: '#d50000',
     accent: '#ff9100',
@@ -122,7 +122,7 @@ export const FISH_CONFIGS = {
     name: 'Cá Mập Đầu Búa',
     multiplier: 70,
     hp: 70,
-    baseSpeed: 1.2,
+    baseSpeed: 0.8,
     radius: 56,
     color: '#455a64',
     accent: '#90a4ae',
@@ -131,7 +131,7 @@ export const FISH_CONFIGS = {
     name: 'Cá Mập Hoàng Kim',
     multiplier: 80,
     hp: 90,
-    baseSpeed: 1.2,
+    baseSpeed: 0.8,
     radius: 64,
     color: '#ffd700',
     accent: '#ff6f00',
@@ -140,7 +140,7 @@ export const FISH_CONFIGS = {
     name: 'Cóc Vàng Thiềm Thừ',
     multiplier: 150,
     hp: 160,
-    baseSpeed: 0.7,
+    baseSpeed: 0.5,
     radius: 72,
     color: '#ffd700',
     accent: '#ff6f00',
@@ -150,7 +150,7 @@ export const FISH_CONFIGS = {
     name: 'Boss Rồng Vàng Thần Thoại',
     multiplier: 250,
     hp: 240,
-    baseSpeed: 0.75,
+    baseSpeed: 0.52,
     radius: 85,
     color: '#ffab00',
     accent: '#d50000',
@@ -170,8 +170,8 @@ export class Fish {
 
     this.pathPoints = pathPoints; // Mảng [P0, P1, P2, P3] điểm điều khiển Bezier
     this.progress = 0; // 0.0 -> 1.0
-    // Giảm tốc độ bơi xuống 48% giúp cá bơi ung dung, dễ ngắm bắn
-    this.speed = (this.config.baseSpeed * speedScale * 0.00018);
+    // Tốc độ bơi được hiệu chỉnh chậm rãi, êm dịu, chuẩn phong cách bắn cá siêu thị (14s - 26s qua màn hình PC)
+    this.speed = (this.config.baseSpeed * speedScale * 0.00007);
 
     this.x = pathPoints[0].x;
     this.y = pathPoints[0].y;
@@ -197,7 +197,7 @@ export class Fish {
   update(dt) {
     if (this.isDead) return;
 
-    this.swimTime += 0.08;
+    this.swimTime += 0.04; // Vây đuôi quẫy uyển chuyển, tự nhiên theo tốc độ bơi thư thả
     this.progress += this.speed * (dt || 16);
 
     if (this.hitTimer > 0) {

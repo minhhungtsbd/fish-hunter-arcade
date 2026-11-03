@@ -176,6 +176,13 @@ export class NetworkManager {
         break;
       }
 
+      case 'BUZZ_BOMB': {
+        if (msg.slotId !== this.game.localSlotId) {
+          this.game.triggerBuzzBomb(msg.slotId, false);
+        }
+        break;
+      }
+
       case 'PLAYER_LEAVE': {
         const cannon = this.game.cannons[msg.slotId];
         if (cannon) {

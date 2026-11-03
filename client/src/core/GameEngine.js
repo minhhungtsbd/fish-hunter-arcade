@@ -32,6 +32,7 @@ export class GameEngine {
 
     this.bullets = [];
     this.nets = [];
+    this.activeBuzzBombs = []; // Danh sách sóng xung kích Buzz Bom đang mở rộng
     this.powerUpBoxes = []; // Danh sách Hộp Đạn tiếp tế
     this.powerUpTimer = 0;
     this.network = null; // Sẽ được gán từ NetworkManager
@@ -192,8 +193,8 @@ export class GameEngine {
     if (this.ui) this.ui.updateHUD();
   }
 
-  // Kích hoạt BUZZ BOM nguyên tử khi đầy 100% năng lượng
-  triggerBuzzBomb(slotId = null) {
+  // Kích hoạt BUZZ BOM nguyên tử khi đầy 100% năng lượng (hiệu ứng sóng xung kích mở rộng chậm rãi, mãn nhãn)
+  triggerBuzzBomb(slotId = null, shouldBroadcast = true) {
     const targetSlot = slotId !== null ? slotId : this.localSlotId;
     const cannon = this.cannons[targetSlot];
     if (!cannon || cannon.energy < 100) {
@@ -205,35 +206,42 @@ export class GameEngine {
 
     cannon.energy = 0;
     this.audio.playNukeBomb();
-    this.particles.triggerScreenShake(30);
+    this.particles.triggerScreenShake(24);
 
-    // Hiệu ứng chữ chấn động
+    // Hiệu ứng chữ chấn động báo hiệu
     this.particles.addFloatingText(
       this.width / 2,
-      this.height / 2 - 40,
+      this.height / 2 - 50,
       '💥 BUZZ BOM NGUYÊN TỬ KÍCH HOẠT! 💥',
       '#ff1744',
-      34
+      36
     );
 
-    // Quét toàn màn hình: tiêu diệt mọi cá nhỏ/trung và gây sát thương cực mạnh cho Boss
-    this.spawner.fishes.forEach(fish => {
-      if (fish.isDead) return;
-      if (fish.config.isBoss) {
-        fish.takeDamage(60);
-        this.particles.addSparks(fish.x, fish.y, '#ffd700', 20);
-      } else {
-        fish.isDead = true;
-        const rewardCoins = fish.multiplier * cannon.bet;
-        cannon.coins += rewardCoins;
-        this.particles.addCoinFountain(fish.x, fish.y, cannon.x, cannon.y, rewardCoins);
-      }
+    // Phóng tia dẫn đường từ nòng pháo người chơi vào tâm nổ đại dương
+    this.particles.addLightning(cannon.x, cannon.y, this.width / 2, this.height / 2, '#00e5ff');
+    this.particles.addSparks(this.width / 2, this.height / 2, '#ffd700', 30);
+
+    // Tạo đợt sóng xung kích chậm rãi quét toàn màn hình trong ~2.4 giây
+    const maxRadius = Math.hypot(this.width, this.height) * 0.75;
+    this.activeBuzzBombs.push({
+      cx: this.width / 2,
+      cy: this.height / 2,
+      cannonX: cannon.x,
+      cannonY: cannon.y,
+      cannonSlot: targetSlot,
+      bet: cannon.bet,
+      radius: 0,
+      maxRadius: maxRadius,
+      duration: 2400, // 2.4 giây lan tỏa chậm rãi
+      elapsed: 0,
+      hitFishIds: new Set(),
+      pulse: 0,
     });
 
     if (this.ui) this.ui.updateHUD();
 
     // Đồng bộ gói tin qua mạng nếu là Multiplayer
-    if (this.network && this.network.isMultiplayer) {
+    if (shouldBroadcast && this.network && this.network.isMultiplayer) {
       this.network.broadcast({
         type: 'BUZZ_BOMB',
         slotId: targetSlot,
@@ -365,6 +373,53 @@ export class GameEngine {
       }
     }
 
+    // 3.5 Cập nhật Sóng xung kích Buzz Bom quét qua màn hình chậm rãi (~2.4 giây)
+    for (let bIdx = this.activeBuzzBombs.length - 1; bIdx >= 0; bIdx--) {
+      const bomb = this.activeBuzzBombs[bIdx];
+      bomb.elapsed += dt;
+      bomb.pulse += 0.14;
+      const progress = Math.min(1.0, bomb.elapsed / bomb.duration);
+      // Easing sin giúp sóng nở ra chậm rãi, uy lực
+      bomb.radius = bomb.maxRadius * Math.sin((progress * Math.PI) / 2);
+
+      // Rung màn hình âm ỉ liên tục trong lúc sóng đang quét
+      if (bomb.elapsed % 150 < dt) {
+        this.particles.triggerScreenShake(3);
+      }
+
+      // Quét cá bị sóng chạm tới (cá gần tâm nổ trước, cá ở xa nổ sau)
+      const cannon = this.cannons[bomb.cannonSlot] || this.cannons[this.localSlotId];
+      for (const fish of this.spawner.fishes) {
+        if (fish.isDead || bomb.hitFishIds.has(fish.id)) continue;
+
+        const dist = Math.hypot(fish.x - bomb.cx, fish.y - bomb.cy);
+        if (dist <= bomb.radius + fish.radius) {
+          bomb.hitFishIds.add(fish.id);
+
+          // Hiệu ứng giật sét và tia lửa tại vị trí từng con cá
+          this.particles.addLightning(bomb.cx, bomb.cy, fish.x, fish.y, '#ffd700');
+          this.particles.addSparks(fish.x, fish.y, '#ff1744', 16);
+
+          if (fish.config.isBoss) {
+            fish.takeDamage(70);
+            this.particles.addFloatingText(fish.x, fish.y - 30, '-70 HP', '#ff5252', 24);
+          } else {
+            fish.isDead = true;
+            const rewardCoins = fish.multiplier * bomb.bet;
+            cannon.coins += rewardCoins;
+            this.particles.addCoinFountain(fish.x, fish.y, cannon.x, cannon.y, rewardCoins);
+            this.audio.playHit();
+          }
+
+          if (this.ui) this.ui.updateHUD();
+        }
+      }
+
+      if (bomb.elapsed >= bomb.duration) {
+        this.activeBuzzBombs.splice(bIdx, 1);
+      }
+    }
+
     // 4. Cập nhật Hộp Đạn Tiếp Tế
     this.powerUpTimer += dt;
     if (this.powerUpTimer > 28000 && this.powerUpBoxes.length < 2) {
@@ -410,7 +465,7 @@ export class GameEngine {
 
         // Hiệu ứng làm chậm và đóng băng của Đạn Băng
         if (net.specialType === 'FROST') {
-          fish.speed = Math.max(0.00004, fish.speed * 0.35);
+          fish.speed = Math.max(0.000015, fish.speed * 0.35);
           fish.hitTimer = 350;
           this.particles.addSparks(fish.x, fish.y, '#80d8ff', 4);
         }
@@ -435,8 +490,8 @@ export class GameEngine {
     const rewardCoins = fish.multiplier * betUsed;
     cannon.coins += rewardCoins;
 
-    // Tích năng lượng nộ khi bắt được cá
-    cannon.addEnergy(Math.min(15, fish.multiplier * 0.35));
+    // Tích năng lượng nộ khi bắt được cá (chậm lại cân bằng)
+    cannon.addEnergy(Math.min(3.5, Math.max(0.15, fish.multiplier * 0.06)));
 
     // Cập nhật giao diện Xu ngay lập tức
     if (this.ui) this.ui.updateHUD();
@@ -517,6 +572,9 @@ export class GameEngine {
     this.bullets.forEach(b => b.render(this.ctx));
     this.nets.forEach(n => n.render(this.ctx));
 
+    // 3.5. Vẽ sóng xung kích nguyên tử Buzz Bom lan tỏa chậm rãi
+    this.renderBuzzBombs(this.ctx);
+
     // 4. Vẽ các hiệu ứng hạt, bọt khí, xu bay, chữ số nhảy điểm
     this.particles.render(this.ctx);
 
@@ -524,6 +582,81 @@ export class GameEngine {
     this.cannons.forEach(c => c.render(this.ctx));
 
     this.ctx.restore();
+  }
+
+  // Vẽ sóng xung kích Buzz Bom nhiều lớp năng lượng neon phát sáng
+  renderBuzzBombs(ctx) {
+    if (!this.activeBuzzBombs || this.activeBuzzBombs.length === 0) return;
+
+    for (const bomb of this.activeBuzzBombs) {
+      const alpha = Math.max(0, 1 - (bomb.elapsed / bomb.duration));
+      ctx.save();
+
+      // 1. Ánh sáng chớp nguyên tử dịu dần trên toàn mặt biển
+      if (bomb.elapsed < 450) {
+        ctx.fillStyle = `rgba(255, 23, 68, ${0.18 * (1 - bomb.elapsed / 450)})`;
+        ctx.fillRect(0, 0, this.width, this.height);
+      }
+
+      // 2. Vầng hào quang tâm nổ ban đầu
+      if (bomb.radius < 350) {
+        const coreGrad = ctx.createRadialGradient(bomb.cx, bomb.cy, 5, bomb.cx, bomb.cy, Math.max(12, bomb.radius));
+        coreGrad.addColorStop(0, `rgba(255, 255, 255, ${alpha * 0.9})`);
+        coreGrad.addColorStop(0.35, `rgba(255, 215, 0, ${alpha * 0.7})`);
+        coreGrad.addColorStop(0.7, `rgba(255, 23, 68, ${alpha * 0.4})`);
+        coreGrad.addColorStop(1, 'rgba(255, 23, 68, 0)');
+        ctx.fillStyle = coreGrad;
+        ctx.beginPath();
+        ctx.arc(bomb.cx, bomb.cy, Math.max(12, bomb.radius), 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // 3. Vòng sóng xung kích rực lửa ngoài cùng
+      ctx.beginPath();
+      ctx.arc(bomb.cx, bomb.cy, Math.max(6, bomb.radius), 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(255, 23, 68, ${alpha * 0.85})`;
+      ctx.lineWidth = 10;
+      ctx.shadowColor = '#ff1744';
+      ctx.shadowBlur = 24;
+      ctx.stroke();
+
+      // 4. Vòng sóng điện từ hoàng kim ở giữa
+      if (bomb.radius > 25) {
+        ctx.beginPath();
+        ctx.arc(bomb.cx, bomb.cy, bomb.radius - 20, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(255, 215, 0, ${alpha * 0.75})`;
+        ctx.lineWidth = 6;
+        ctx.shadowColor = '#ffd700';
+        ctx.shadowBlur = 18;
+        ctx.stroke();
+      }
+
+      // 5. Vòng xung kích xanh neon bên trong
+      if (bomb.radius > 50) {
+        ctx.beginPath();
+        ctx.arc(bomb.cx, bomb.cy, bomb.radius - 45, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(0, 229, 255, ${alpha * 0.6})`;
+        ctx.lineWidth = 3;
+        ctx.shadowColor = '#00e5ff';
+        ctx.shadowBlur = 12;
+        ctx.stroke();
+      }
+
+      // 6. Các hạt điện tích quay xung quanh chu vi sóng
+      const numArcs = 8;
+      for (let i = 0; i < numArcs; i++) {
+        const angle = (i / numArcs) * Math.PI * 2 + bomb.pulse;
+        const sparkDist = bomb.radius + (Math.sin(bomb.pulse * 2 + i) * 14);
+        const px = bomb.cx + Math.cos(angle) * sparkDist;
+        const py = bomb.cy + Math.sin(angle) * sparkDist;
+        ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.9})`;
+        ctx.beginPath();
+        ctx.arc(px, py, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.restore();
+    }
   }
 
   renderOceanBackground() {

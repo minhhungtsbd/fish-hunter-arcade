@@ -194,36 +194,49 @@ export class AudioEngine {
     } catch (_) {}
   }
 
-  // Âm thanh BUZZ BOM / Nuke Bomb chấn động toàn màn hình
+  // Âm thanh BUZZ BOM / Nuke Bomb chấn động toàn màn hình (kéo dài ~2.4s theo sóng xung kích)
   playNukeBomb() {
     if (this.isMuted || !this.ctx) return;
     try {
       const now = this.ctx.currentTime;
-      // 1. Tiếng còi hú xung kích
+      // 1. Tiếng còi hú xung kích khởi động
       const osc1 = this.ctx.createOscillator();
       const gain1 = this.ctx.createGain();
       osc1.type = 'sawtooth';
-      osc1.frequency.setValueAtTime(900, now);
-      osc1.frequency.exponentialRampToValueAtTime(80, now + 0.4);
+      osc1.frequency.setValueAtTime(850, now);
+      osc1.frequency.exponentialRampToValueAtTime(70, now + 0.5);
       gain1.gain.setValueAtTime(0.4 * this.masterVolume, now);
-      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
       osc1.connect(gain1);
       gain1.connect(this.ctx.destination);
       osc1.start(now);
-      osc1.stop(now + 0.42);
+      osc1.stop(now + 0.52);
 
-      // 2. Tiếng nổ sub-bass rền kéo dài 1.2s
+      // 2. Tiếng nổ sub-bass rền đáy biển kéo dài 2.4s theo sóng lan tỏa
       const osc2 = this.ctx.createOscillator();
       const gain2 = this.ctx.createGain();
       osc2.type = 'triangle';
-      osc2.frequency.setValueAtTime(120, now + 0.2);
-      osc2.frequency.exponentialRampToValueAtTime(20, now + 1.2);
-      gain2.gain.setValueAtTime(0.6 * this.masterVolume, now + 0.2);
-      gain2.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+      osc2.frequency.setValueAtTime(130, now + 0.15);
+      osc2.frequency.exponentialRampToValueAtTime(22, now + 2.3);
+      gain2.gain.setValueAtTime(0.7 * this.masterVolume, now + 0.15);
+      gain2.gain.exponentialRampToValueAtTime(0.001, now + 2.3);
       osc2.connect(gain2);
       gain2.connect(this.ctx.destination);
-      osc2.start(now + 0.2);
-      osc2.stop(now + 1.25);
+      osc2.start(now + 0.15);
+      osc2.stop(now + 2.35);
+
+      // 3. Tiếng ầm ầm hạ âm sâu chấn động không gian
+      const osc3 = this.ctx.createOscillator();
+      const gain3 = this.ctx.createGain();
+      osc3.type = 'sine';
+      osc3.frequency.setValueAtTime(55, now + 0.25);
+      osc3.frequency.exponentialRampToValueAtTime(18, now + 2.1);
+      gain3.gain.setValueAtTime(0.5 * this.masterVolume, now + 0.25);
+      gain3.gain.exponentialRampToValueAtTime(0.001, now + 2.1);
+      osc3.connect(gain3);
+      gain3.connect(this.ctx.destination);
+      osc3.start(now + 0.25);
+      osc3.stop(now + 2.15);
     } catch (_) {}
   }
 

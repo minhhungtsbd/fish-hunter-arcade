@@ -136,8 +136,8 @@ export class Cannon {
     this.shootCooldown = this.fireRateMs;
     this.recoil = 12; // Giật nòng 12px
 
-    // Tích thêm 1.2% năng lượng cho mỗi phát bắn
-    this.addEnergy(1.2);
+    // Tích thêm 0.25% năng lượng cho mỗi phát bắn (tích lũy chậm rãi, cân bằng)
+    this.addEnergy(0.25);
 
     // Tính toán đạn đặc biệt nếu đang sở hữu
     const activeSpecial = this.specialWeapon;
