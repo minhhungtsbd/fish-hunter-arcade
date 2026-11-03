@@ -25,9 +25,14 @@
           <option value="NORMAL" selected>⚖️ Chuẩn</option>
           <option value="HARD">🔥 Khó</option>
         </select>
+        <select id="bot-count-select" class="arcade-select" title="Tùy chọn số lượng Bot chơi cùng (0, 1, 2 hoặc 3 Bot)">
+          <option value="0">🤖 0 Bot</option>
+          <option value="1">🤖 1 Bot</option>
+          <option value="2">🤖 2 Bot</option>
+          <option value="3" selected>🤖 3 Bot</option>
+        </select>
         <button id="btn-sound" class="arcade-btn" title="Bật/Tắt âm thanh hiệu ứng"><span class="btn-icon">🔊</span><span class="btn-text"> Âm thanh</span></button>
         <button id="btn-music" class="arcade-btn" title="Bật/Tắt nhạc nền đại dương"><span class="btn-icon">🎵</span><span class="btn-text"> Nhạc nền</span></button>
-        <button id="btn-toggle-bots" class="arcade-btn" title="Bật/Tắt 3 AI Bot chơi cùng"><span class="btn-icon">🤖</span><span class="btn-text"> Bật 3 Bot</span></button>
         <button id="btn-paytable" class="arcade-btn" title="Xem danh sách cá & thưởng"><span class="btn-icon">📖</span><span class="btn-text"> Bảng thưởng</span></button>
         <button id="btn-invite" class="arcade-btn" title="Mời bạn bè cùng chơi"><span class="btn-icon">👥</span><span class="btn-text"> Mời bạn</span></button>
         <button id="btn-fullscreen" class="arcade-btn" title="Toàn màn hình"><span class="btn-icon">⛶</span></button>
@@ -51,6 +56,20 @@
         <span style="font-size: 16px;">💰</span>
         <span class="user-coins-label">XU:</span>
         <span id="user-coins-display" class="user-coins-num">10,000</span>
+      </div>
+
+      <!-- Năng lượng tích nộ & Nút Buzz Bom -->
+      <div class="energy-box" title="Bắn đạn và bắt cá để tích năng lượng. Đạt 100% kích hoạt Buzz Bom quét sạch màn hình!">
+        <div class="energy-bar-wrap">
+          <div id="energy-progress" class="energy-progress-fill" style="width: 0%;"></div>
+          <span id="energy-text" class="energy-text">⚡ NỘ: 0%</span>
+        </div>
+        <button id="btn-buzz-bomb" class="buzz-bomb-btn" title="Kích hoạt Buzz Bom Nguyên Tử khi đầy 100% (Phím B)">💥 BUZZ BOM</button>
+      </div>
+
+      <!-- Badge hiển thị Đạn Tiếp Tế Đặc Biệt -->
+      <div id="special-ammo-badge" class="special-ammo-badge" style="display: none;">
+        <span id="special-ammo-text">⚡ LASER x20</span>
       </div>
 
       <!-- Điều khiển mức cược đạn -->

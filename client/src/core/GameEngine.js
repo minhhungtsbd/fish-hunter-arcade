@@ -8,6 +8,7 @@ import { AudioEngine } from '../audio/AudioEngine.js';
 import { ParticleSystem } from './ParticleSystem.js';
 import { FishSpawner } from '../entities/FishSpawner.js';
 import { Cannon } from '../entities/Cannon.js';
+import { PowerUpBox } from '../entities/PowerUpBox.js';
 
 export class GameEngine {
   constructor(canvas) {
@@ -31,6 +32,8 @@ export class GameEngine {
 
     this.bullets = [];
     this.nets = [];
+    this.powerUpBoxes = []; // Danh sách Hộp Đạn tiếp tế
+    this.powerUpTimer = 0;
     this.network = null; // Sẽ được gán từ NetworkManager
 
     this.localSlotId = 0; // Mặc định người chơi ngồi Slot 0
@@ -160,8 +163,84 @@ export class GameEngine {
           '#ffd700',
           18
         );
+      } else if (e.code === 'KeyB') {
+        this.triggerBuzzBomb();
       }
     });
+  }
+
+  // Tùy chọn bật 0, 1, 2 hoặc 3 Bot
+  setBotCount(count) {
+    const num = Math.max(0, Math.min(3, parseInt(count, 10) || 0));
+    const otherSlots = [0, 1, 2, 3].filter(s => s !== this.localSlotId);
+
+    otherSlots.forEach((slotId, index) => {
+      const cannon = this.cannons[slotId];
+      if (index < num) {
+        cannon.isOccupied = true;
+        cannon.isBot = true;
+        cannon.isLocal = false;
+        cannon.playerName = `Bot ${['Hải Tặc', 'Thủy Thủ', 'Ngư Phủ', 'Đại Gia'][slotId]}`;
+      } else {
+        cannon.isOccupied = false;
+        cannon.isBot = false;
+      }
+    });
+
+    const botMsg = num === 0 ? '🤖 ĐÃ TẮT HẾT BOT' : `🤖 ĐÃ BẬT ${num} AI BOT CHƠI CÙNG`;
+    this.particles.addFloatingText(this.width / 2, this.height / 2 - 30, botMsg, '#00e5ff', 20);
+    if (this.ui) this.ui.updateHUD();
+  }
+
+  // Kích hoạt BUZZ BOM nguyên tử khi đầy 100% năng lượng
+  triggerBuzzBomb(slotId = null) {
+    const targetSlot = slotId !== null ? slotId : this.localSlotId;
+    const cannon = this.cannons[targetSlot];
+    if (!cannon || cannon.energy < 100) {
+      if (cannon && cannon.isLocal) {
+        this.particles.addFloatingText(cannon.x, cannon.y - 45, 'CHƯA ĐỦ 100% NĂNG LƯỢNG NỘ!', '#ff5252', 18);
+      }
+      return false;
+    }
+
+    cannon.energy = 0;
+    this.audio.playNukeBomb();
+    this.particles.triggerScreenShake(30);
+
+    // Hiệu ứng chữ chấn động
+    this.particles.addFloatingText(
+      this.width / 2,
+      this.height / 2 - 40,
+      '💥 BUZZ BOM NGUYÊN TỬ KÍCH HOẠT! 💥',
+      '#ff1744',
+      34
+    );
+
+    // Quét toàn màn hình: tiêu diệt mọi cá nhỏ/trung và gây sát thương cực mạnh cho Boss
+    this.spawner.fishes.forEach(fish => {
+      if (fish.isDead) return;
+      if (fish.config.isBoss) {
+        fish.takeDamage(60);
+        this.particles.addSparks(fish.x, fish.y, '#ffd700', 20);
+      } else {
+        fish.isDead = true;
+        const rewardCoins = fish.multiplier * cannon.bet;
+        cannon.coins += rewardCoins;
+        this.particles.addCoinFountain(fish.x, fish.y, cannon.x, cannon.y, rewardCoins);
+      }
+    });
+
+    if (this.ui) this.ui.updateHUD();
+
+    // Đồng bộ gói tin qua mạng nếu là Multiplayer
+    if (this.network && this.network.isMultiplayer) {
+      this.network.broadcast({
+        type: 'BUZZ_BOMB',
+        slotId: targetSlot,
+      });
+    }
+
+    return true;
   }
 
   setLocalSlot(slotId) {
@@ -225,6 +304,29 @@ export class GameEngine {
       const b = this.bullets[i];
       b.update(dt, this.width, this.height);
 
+      // Kiểm tra va chạm đạn với Hộp Đạn tiếp tế
+      let hitBox = null;
+      for (const box of this.powerUpBoxes) {
+        if (!box.isDead && Math.hypot(b.x - box.x, b.y - box.y) < (box.width / 2 + b.radius + 4)) {
+          hitBox = box;
+          break;
+        }
+      }
+
+      if (hitBox) {
+        const destroyed = hitBox.takeDamage(1);
+        this.audio.playHit();
+        this.particles.addSparks(hitBox.x, hitBox.y, hitBox.weaponConfig.color, 8);
+        if (destroyed) {
+          const cannon = this.cannons[b.slotId];
+          if (cannon) {
+            cannon.setSpecialWeapon(hitBox.weaponType, hitBox.weaponConfig.ammoCount);
+          }
+          this.particles.addSparks(hitBox.x, hitBox.y, '#ffd700', 30);
+        }
+        b.isDead = true;
+      }
+
       // Kiểm tra va chạm đạn với cá
       let hitFish = null;
       for (const fish of this.spawner.fishes) {
@@ -235,10 +337,16 @@ export class GameEngine {
       }
 
       if (hitFish || b.isDead) {
-        const net = b.explode();
-        this.nets.push(net);
+        const spawnedNets = b.explode();
+        if (Array.isArray(spawnedNets)) {
+          this.nets.push(...spawnedNets);
+        } else if (spawnedNets) {
+          this.nets.push(spawnedNets);
+        }
         this.audio.playNet();
-        this.bullets.splice(i, 1);
+        if (b.isDead) {
+          this.bullets.splice(i, 1);
+        }
       }
     }
 
@@ -257,10 +365,27 @@ export class GameEngine {
       }
     }
 
-    // 4. Cập nhật Đàn cá & Sinh cá
+    // 4. Cập nhật Hộp Đạn Tiếp Tế
+    this.powerUpTimer += dt;
+    if (this.powerUpTimer > 28000 && this.powerUpBoxes.length < 2) {
+      this.powerUpTimer = 0;
+      const startSide = Math.random() > 0.5 ? 'LEFT' : 'RIGHT';
+      const box = new PowerUpBox(`box_${Date.now()}`, startSide, this.width, this.height);
+      this.powerUpBoxes.push(box);
+      this.particles.addFloatingText(this.width / 2, 85, '📦 HỘP ĐẠN TIẾP TẾ XUẤT HIỆN!', '#00e5ff', 22);
+    }
+    for (let i = this.powerUpBoxes.length - 1; i >= 0; i--) {
+      const box = this.powerUpBoxes[i];
+      box.update(dt, this.width, this.height);
+      if (box.isDead) {
+        this.powerUpBoxes.splice(i, 1);
+      }
+    }
+
+    // 5. Cập nhật Đàn cá & Sinh cá
     this.spawner.update(dt);
 
-    // 5. Cập nhật Hệ thống hạt & xu bay
+    // 6. Cập nhật Hệ thống hạt & xu bay
     this.particles.update(dt, this.width, this.height);
   }
 
@@ -283,6 +408,13 @@ export class GameEngine {
       if (dist <= net.currentRadius + fish.radius) {
         this.audio.playHit();
 
+        // Hiệu ứng làm chậm và đóng băng của Đạn Băng
+        if (net.specialType === 'FROST') {
+          fish.speed = Math.max(0.00004, fish.speed * 0.35);
+          fish.hitTimer = 350;
+          this.particles.addSparks(fish.x, fish.y, '#80d8ff', 4);
+        }
+
         // Sát thương theo cấp độ đạn và chế độ chơi
         const damage = Math.max(1, Math.round((net.bet / 10) * diff.dmgMult));
         const isDeadByHp = fish.takeDamage(damage);
@@ -302,6 +434,9 @@ export class GameEngine {
     fish.isDead = true;
     const rewardCoins = fish.multiplier * betUsed;
     cannon.coins += rewardCoins;
+
+    // Tích năng lượng nộ khi bắt được cá
+    cannon.addEnergy(Math.min(15, fish.multiplier * 0.35));
 
     // Cập nhật giao diện Xu ngay lập tức
     if (this.ui) this.ui.updateHUD();
@@ -374,8 +509,9 @@ export class GameEngine {
     // 1. Vẽ nền đại dương sâu thẳm lung linh (Deep Ocean Background)
     this.renderOceanBackground();
 
-    // 2. Vẽ đàn cá bơi
+    // 2. Vẽ đàn cá bơi & Hộp đạn tiếp tế
     this.spawner.render(this.ctx);
+    this.powerUpBoxes.forEach(b => b.render(this.ctx));
 
     // 3. Vẽ đạn & lưới năng lượng
     this.bullets.forEach(b => b.render(this.ctx));

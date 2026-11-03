@@ -154,6 +154,97 @@ export class AudioEngine {
     } catch (_) {}
   }
 
+  // Âm thanh BUZZ BOM / Nuke Bomb chấn động toàn màn hình
+  playNukeBomb() {
+    if (this.isMuted || !this.ctx) return;
+    try {
+      const now = this.ctx.currentTime;
+      // 1. Tiếng còi hú xung kích
+      const osc1 = this.ctx.createOscillator();
+      const gain1 = this.ctx.createGain();
+      osc1.type = 'sawtooth';
+      osc1.frequency.setValueAtTime(900, now);
+      osc1.frequency.exponentialRampToValueAtTime(80, now + 0.4);
+      gain1.gain.setValueAtTime(0.4 * this.masterVolume, now);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+      osc1.connect(gain1);
+      gain1.connect(this.ctx.destination);
+      osc1.start(now);
+      osc1.stop(now + 0.42);
+
+      // 2. Tiếng nổ sub-bass rền kéo dài 1.2s
+      const osc2 = this.ctx.createOscillator();
+      const gain2 = this.ctx.createGain();
+      osc2.type = 'triangle';
+      osc2.frequency.setValueAtTime(120, now + 0.2);
+      osc2.frequency.exponentialRampToValueAtTime(20, now + 1.2);
+      gain2.gain.setValueAtTime(0.6 * this.masterVolume, now + 0.2);
+      gain2.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+      osc2.connect(gain2);
+      gain2.connect(this.ctx.destination);
+      osc2.start(now + 0.2);
+      osc2.stop(now + 1.25);
+    } catch (_) {}
+  }
+
+  // Âm thanh khi tích đầy 100% thanh năng lượng Buzz Bom
+  playEnergyFull() {
+    if (this.isMuted || !this.ctx) return;
+    try {
+      [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+        const now = this.ctx.currentTime + idx * 0.08;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now);
+        gain.gain.setValueAtTime(0.25 * this.masterVolume, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.21);
+      });
+    } catch (_) {}
+  }
+
+  // Âm thanh khi bắn trúng Hộp Đạn tiếp tế (Upgrade vũ khí mới)
+  playPowerupCollect() {
+    if (this.isMuted || !this.ctx) return;
+    try {
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(400, now);
+      osc.frequency.linearRampToValueAtTime(1200, now + 0.25);
+      gain.gain.setValueAtTime(0.3 * this.masterVolume, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.26);
+    } catch (_) {}
+  }
+
+  // Âm thanh bắn đạn Laser xuyên thấu
+  playLaserBeam() {
+    if (this.isMuted || !this.ctx) return;
+    try {
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(1200, now);
+      osc.frequency.exponentialRampToValueAtTime(300, now + 0.18);
+      gain.gain.setValueAtTime(0.25 * this.masterVolume, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.19);
+    } catch (_) {}
+  }
+
   // Tiếng sét phóng giật liên hoàn (Cá điện)
   playLightning() {
     if (this.isMuted || !this.ctx) return;

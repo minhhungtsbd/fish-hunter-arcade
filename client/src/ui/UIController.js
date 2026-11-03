@@ -108,22 +108,13 @@ export class UIController {
       });
     }
 
-    // 5. Nút Bật/Tắt Bot 3 ghế trống
-    const btnBots = document.getElementById('btn-toggle-bots');
-    let botsActive = false;
-    if (btnBots) {
-      btnBots.addEventListener('click', () => {
-        botsActive = !botsActive;
-        [1, 2, 3].forEach(slotId => {
-          if (slotId !== this.game.localSlotId) {
-            const cannon = this.game.cannons[slotId];
-            cannon.isBot = botsActive;
-            cannon.isOccupied = botsActive;
-            cannon.playerName = `Bot ${['Hải Tặc', 'Thủy Thủ', 'Ngư Phủ', 'Đại Gia'][slotId]}`;
-          }
-        });
-        btnBots.classList.toggle('active', botsActive);
-        btnBots.innerText = botsActive ? '🤖 Bot: Đang chơi' : '🤖 Bật 3 Bot';
+    // 5. Tùy chọn bật 0, 1, 2 hoặc 3 Bot
+    const botSelect = document.getElementById('bot-count-select');
+    if (botSelect) {
+      // Khởi tạo mặc định số bot theo cấu hình select
+      setTimeout(() => this.game.setBotCount(botSelect.value), 300);
+      botSelect.addEventListener('change', (e) => {
+        this.game.setBotCount(e.target.value);
       });
     }
 
@@ -249,6 +240,15 @@ export class UIController {
         rotatePrompt.classList.add('dismissed');
       });
     }
+
+    // 14. Nút Kích hoạt Buzz Bom Nguyên Tử
+    const btnBuzz = document.getElementById('btn-buzz-bomb');
+    if (btnBuzz) {
+      btnBuzz.addEventListener('click', () => {
+        this.game.audio.init();
+        this.game.triggerBuzzBomb();
+      });
+    }
   }
 
   updateHUD() {
@@ -263,6 +263,32 @@ export class UIController {
     const coinsDisplay = document.getElementById('user-coins-display');
     if (coinsDisplay) {
       coinsDisplay.innerText = Math.max(0, Math.floor(cannon.coins)).toLocaleString('vi-VN');
+    }
+
+    // Cập nhật Thanh Năng Lượng & Nút Buzz Bom
+    const energyBar = document.getElementById('energy-progress');
+    const energyText = document.getElementById('energy-text');
+    const btnBuzz = document.getElementById('btn-buzz-bomb');
+
+    const pct = Math.min(100, Math.floor(cannon.energy || 0));
+    if (energyBar) energyBar.style.width = `${pct}%`;
+    if (energyText) energyText.innerText = `⚡ NỘ: ${pct}%`;
+    if (btnBuzz) {
+      btnBuzz.classList.toggle('ready', pct >= 100);
+      btnBuzz.innerText = pct >= 100 ? '💥 BUZZ BOM!' : '💥 BUZZ BOM';
+    }
+
+    // Cập nhật Badge Đạn Tiếp Tế Đặc Biệt
+    const ammoBadge = document.getElementById('special-ammo-badge');
+    const ammoText = document.getElementById('special-ammo-text');
+    if (ammoBadge && ammoText) {
+      if (cannon.specialWeapon && cannon.specialAmmo > 0) {
+        ammoBadge.style.display = 'inline-flex';
+        const icons = { LASER: '⚡', FROST: '❄️', CLUSTER: '💥' };
+        ammoText.innerText = `${icons[cannon.specialWeapon] || '📦'} ${cannon.specialWeapon} x${cannon.specialAmmo}`;
+      } else {
+        ammoBadge.style.display = 'none';
+      }
     }
   }
 }

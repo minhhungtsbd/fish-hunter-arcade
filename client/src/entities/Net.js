@@ -4,7 +4,7 @@
  * Giật sát thương và tính toán bắt cá chuẩn arcade.
  */
 export class Net {
-  constructor(id, slotId, x, y, bet, maxRadius = 55, color = '#00e5ff') {
+  constructor(id, slotId, x, y, bet, maxRadius = 55, color = '#00e5ff', specialType = null) {
     this.id = id;
     this.slotId = slotId;
     this.x = x;
@@ -14,6 +14,7 @@ export class Net {
     this.maxRadius = maxRadius;
     this.life = 1.0;
     this.color = color;
+    this.specialType = specialType;
     this.hasDamaged = false; // Chỉ gây sát thương 1 lần khi bung ra
   }
 

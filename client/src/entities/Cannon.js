@@ -32,6 +32,10 @@ export class Cannon {
     this.betIndex = 0;              // Mức cược ban đầu = 10 xu
     this.bet = BET_STEPS[this.betIndex];
 
+    this.energy = 0;                // Năng lượng tích nộ Buzz Bom (0 -> 100%)
+    this.specialWeapon = null;      // Loại đạn đặc biệt: 'LASER' | 'FROST' | 'CLUSTER'
+    this.specialAmmo = 0;           // Số lượng đạn đặc biệt còn lại
+
     this.x = 0;
     this.y = 0;
     this.angle = this.config.defaultAngle;
@@ -94,6 +98,25 @@ export class Cannon {
     }
   }
 
+  addEnergy(amount) {
+    const prev = this.energy;
+    this.energy = Math.min(100, Math.max(0, this.energy + amount));
+    if (this.energy >= 100 && prev < 100 && this.isLocal) {
+      this.game.audio.playEnergyFull();
+      this.game.particles.addFloatingText(this.x, this.y - 50, '⚡ NĂNG LƯỢNG 100%! BUZZ BOM ĐÃ SẴN SÀNG! ⚡', '#ffd700', 22);
+    }
+    if (this.game.ui) this.game.ui.updateHUD();
+  }
+
+  setSpecialWeapon(weaponType, ammoCount) {
+    this.specialWeapon = weaponType;
+    this.specialAmmo = ammoCount;
+    this.game.audio.playPowerupCollect();
+    const names = { LASER: 'ĐẠN LASER', FROST: 'ĐẠN BĂNG', CLUSTER: 'ĐẠN CHÙM' };
+    this.game.particles.addFloatingText(this.x, this.y - 45, `📦 ${names[weaponType] || weaponType} x${ammoCount}!`, '#00e5ff', 22);
+    if (this.game.ui) this.game.ui.updateHUD();
+  }
+
   canShoot() {
     return this.isOccupied && this.coins >= this.bet && this.shootCooldown <= 0;
   }
@@ -110,7 +133,19 @@ export class Cannon {
     this.shootCooldown = this.fireRateMs;
     this.recoil = 12; // Giật nòng 12px
 
-    // Cập nhật số xu hiển thị ngay lập tức
+    // Tích thêm 1.2% năng lượng cho mỗi phát bắn
+    this.addEnergy(1.2);
+
+    // Tính toán đạn đặc biệt nếu đang sở hữu
+    const activeSpecial = this.specialWeapon;
+    if (this.specialWeapon) {
+      this.specialAmmo--;
+      if (this.specialAmmo <= 0) {
+        this.specialWeapon = null;
+      }
+    }
+
+    // Cập nhật số xu & năng lượng hiển thị ngay lập tức
     if (this.game.ui) {
       this.game.ui.updateHUD();
     }
@@ -127,12 +162,17 @@ export class Cannon {
       tipY,
       this.angle,
       this.bet,
-      this.color
+      this.color,
+      activeSpecial
     );
 
     // Âm thanh và tia lửa đầu nòng
-    this.game.audio.playShoot(this.betIndex + 1);
-    this.game.particles.addSparks(tipX, tipY, this.color, 8);
+    if (activeSpecial === 'LASER') {
+      this.game.audio.playLaserBeam();
+    } else {
+      this.game.audio.playShoot(this.betIndex + 1);
+    }
+    this.game.particles.addSparks(tipX, tipY, bullet.color, 8);
 
     // Gửi gói tin qua mạng nếu là Multiplayer
     if (this.isLocal && this.game.network && this.game.network.isMultiplayer) {
@@ -221,15 +261,15 @@ export class Cannon {
 
     // 1. Mâm pháo kim loại tròn (Cannon Base)
     ctx.fillStyle = '#263238';
-    ctx.shadowColor = this.color;
-    ctx.shadowBlur = 10;
+    ctx.shadowColor = this.energy >= 100 ? '#ffd700' : this.color;
+    ctx.shadowBlur = this.energy >= 100 ? 20 : 10;
     ctx.beginPath();
     ctx.arc(0, 0, 36, 0, Math.PI * 2);
     ctx.fill();
 
-    // Vành đèn LED phát sáng
-    ctx.strokeStyle = this.color;
-    ctx.lineWidth = 3;
+    // Vành đèn LED phát sáng (nhấp nháy vàng rực khi đầy 100% nộ)
+    ctx.strokeStyle = this.energy >= 100 ? '#ffd700' : this.color;
+    ctx.lineWidth = this.energy >= 100 ? 4 : 3;
     ctx.stroke();
 
     // 2. Nòng súng quay theo góc (Rotating Barrel with Recoil)
@@ -319,12 +359,21 @@ export class Cannon {
     // Số xu vàng
     ctx.fillStyle = '#ffd700';
     ctx.font = 'bold 13px "Arial Black", sans-serif';
-    ctx.fillText(`💰 ${this.coins.toLocaleString('vi-VN')} Xu`, 0, 12);
+    ctx.fillText(`💰 ${this.coins.toLocaleString('vi-VN')} Xu`, 0, 10);
 
-    // Mức cược đạn hiện tại
-    ctx.fillStyle = this.color;
+    // Mini thanh năng lượng Buzz Bom
+    const energyW = 130;
+    const energyH = 3;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+    ctx.fillRect(-energyW / 2, 16, energyW, energyH);
+    ctx.fillStyle = this.energy >= 100 ? '#ffd700' : '#00e5ff';
+    ctx.fillRect(-energyW / 2, 16, (energyW * (this.energy / 100)), energyH);
+
+    // Mức cược đạn hiện tại hoặc hiển thị đạn đặc biệt
+    ctx.fillStyle = this.specialWeapon ? '#00e5ff' : this.color;
     ctx.font = 'bold 10px sans-serif';
-    ctx.fillText(`Đạn: ${this.bet} xu`, 0, isBottom ? -26 : 28);
+    const weaponText = this.specialWeapon ? `📦 ${this.specialWeapon} x${this.specialAmmo}` : `Đạn: ${this.bet} xu`;
+    ctx.fillText(weaponText, 0, isBottom ? -26 : 28);
 
     ctx.restore();
   }

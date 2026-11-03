@@ -137,16 +137,18 @@ git push -u origin main
 
 ---
 
-## 🎮 Hướng Dẫn Điều Khiển Trong Game
+## 🎮 Hướng Dẫn Điều Khiển & Tính Năng Độc Đáo
 
 | Thao tác | Hành động |
 | :--- | :--- |
-| **Click Chuột Trái / Chạm màn hình** | Bắn đạn về hướng chỉ định |
+| **Click Chuột / Chạm giữ màn hình** | Bắn đạn / Bắn liên thanh theo hướng ngón tay |
 | **Click vào con cá bất kỳ** | **Khóa mục tiêu (Lock-on)** - Nòng pháo tự bám theo con cá đó |
 | **Phím Space (Cách)** | Bắn nhanh một phát đạn |
 | **Phím A** | Bật / Tắt chế độ **Tự động bắn liên tục (Auto-Fire)** |
+| **Phím B (hoặc Nút 💥 BUZZ BOM)** | **Kích hoạt BUZZ BOM Nguyên Tử** quét sạch màn hình khi tích đầy 100% nộ! |
 | **Nút [+] / [-] (hoặc Phím Mũi Tên Lên / Xuống)** | Tăng / Giảm mức cược đạn (10 -> 1000 xu) |
-| **Nút "🤖 Bật 3 Bot"** | Kích hoạt 3 máy AI tự động chơi cùng ở 3 ghế trống |
+| **Menu Bot [0, 1, 2, 3 Bot]** | Tùy chọn chính xác số lượng máy AI chơi cùng |
+| **📦 Hộp Đạn Tiếp Tế Ngẫu Nhiên** | Trôi qua màn hình, bắn vỡ để nhận: **Đạn Laser Xuyên Thấu**, **Đạn Băng Đông Cứng**, hoặc **Đạn Chùm Phân Mảnh** |
 | **Nút "+5,000 Xu Free"** | Nhận 5,000 xu miễn phí bất cứ lúc nào |
 
 ---

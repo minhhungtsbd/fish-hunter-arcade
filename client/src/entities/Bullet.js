@@ -6,21 +6,23 @@
 import { Net } from './Net.js';
 
 export class Bullet {
-  constructor(id, slotId, x, y, angle, bet = 10, color = '#00e5ff') {
+  constructor(id, slotId, x, y, angle, bet = 10, color = '#00e5ff', specialType = null) {
     this.id = id;
     this.slotId = slotId;
     this.x = x;
     this.y = y;
     this.angle = angle;
     this.bet = bet;
-    this.color = color;
+    this.color = specialType === 'LASER' ? '#00ffff' : specialType === 'FROST' ? '#80d8ff' : specialType === 'CLUSTER' ? '#ff9100' : color;
+    this.specialType = specialType;
 
-    const speed = 12.0;
+    const speed = specialType === 'LASER' ? 18.0 : 12.0;
     this.vx = Math.cos(angle) * speed;
     this.vy = Math.sin(angle) * speed;
 
     this.radius = bet >= 100 ? 7 : 5;
     this.bouncesRemaining = 1; // Đạn chỉ phản xạ viền đúng 1 lần
+    this.piercesRemaining = specialType === 'LASER' ? 3 : 0; // Đạn laser xuyên qua 3 con cá
     this.isDead = false;
     this.trail = [];
   }
@@ -62,19 +64,49 @@ export class Bullet {
     }
   }
 
-  // Tạo lưới khi chạm vào cá
+  // Tạo lưới khi chạm vào cá hoặc hộp đạn
   explode() {
-    this.isDead = true;
+    if (this.piercesRemaining > 0) {
+      this.piercesRemaining--;
+    } else {
+      this.isDead = true;
+    }
+
     const netRadius = this.bet >= 500 ? 75 : this.bet >= 100 ? 60 : 45;
-    return new Net(
+    const nets = [];
+
+    // Lưới chính
+    const mainNet = new Net(
       `net_${Date.now()}_${Math.random()}`,
       this.slotId,
       this.x,
       this.y,
       this.bet,
       netRadius,
-      this.color
+      this.color,
+      this.specialType
     );
+    nets.push(mainNet);
+
+    // Nếu là Đạn Chùm (CLUSTER): bung thêm 2 lưới phụ xung quanh
+    if (this.specialType === 'CLUSTER') {
+      [-32, 32].forEach((offset, idx) => {
+        const ox = this.x + Math.cos(this.angle + Math.PI / 2) * offset;
+        const oy = this.y + Math.sin(this.angle + Math.PI / 2) * offset;
+        nets.push(new Net(
+          `net_cluster_${Date.now()}_${idx}`,
+          this.slotId,
+          ox,
+          oy,
+          this.bet,
+          netRadius * 0.8,
+          '#ff9100',
+          'CLUSTER'
+        ));
+      });
+    }
+
+    return nets;
   }
 
   render(ctx) {
