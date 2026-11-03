@@ -1,0 +1,22 @@
+{
+  "name": "fish-hunter-multiplayer",
+  "version": "1.0.0",
+  "description": "Game Bắn Cá Ăn Xu Siêu Thị 4P Multiplayer (Cloudflare Pages + Workers Free Tier)",
+  "private": true,
+  "scripts": {
+    "dev": "cd client && npm run dev",
+    "build": "cd client && npm run build",
+    "worker:dev": "cd worker && npm run dev",
+    "worker:deploy": "cd worker && npm run deploy"
+  },
+  "keywords": [
+    "game-ban-ca",
+    "fish-hunter",
+    "arcade-game",
+    "multiplayer",
+    "cloudflare-pages",
+    "cloudflare-workers"
+  ],
+  "author": "",
+  "license": "MIT"
+}

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Bắn Cá Ăn Xu Siêu Thị 4P - Arcade Fish Hunter Multiplayer</title>
+  <link rel="stylesheet" href="./src/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐟</text></svg>">
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="game-canvas"></canvas>
+
+    <!-- Thanh công cụ trên cùng -->
+    <header class="top-bar">
+      <div class="brand">
+        <span style="font-size: 18px;">🌊</span>
+        <div class="brand-title">BẮN CÁ ĂN XU 4P</div>
+        <div id="room-badge-text" class="room-badge">#PHÒNG: CA8888</div>
+      </div>
+
+      <div class="top-controls">
+        <button id="btn-sound" class="arcade-btn" title="Bật/Tắt âm thanh hiệu ứng">🔊 Âm thanh</button>
+        <button id="btn-music" class="arcade-btn" title="Bật/Tắt nhạc nền đại dương">🎵 Nhạc nền</button>
+        <button id="btn-toggle-bots" class="arcade-btn" title="Bật/Tắt 3 AI Bot chơi cùng">🤖 Bật 3 Bot</button>
+        <button id="btn-paytable" class="arcade-btn" title="Xem danh sách cá & thưởng">📖 Bảng thưởng</button>
+        <button id="btn-invite" class="arcade-btn" title="Mời bạn bè cùng chơi">👥 Mời bạn</button>
+        <button id="btn-fullscreen" class="arcade-btn" title="Toàn màn hình">⛶</button>
+      </div>
+    </header>
+
+    <!-- Thanh công cụ người chơi phía dưới -->
+    <footer class="bottom-bar">
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <span style="font-size: 11px; color: #81d4fa; font-weight: bold;">VỊ TRÍ:</span>
+        <select id="seat-select" style="background: #092032; color: #00e5ff; border: 1px solid rgba(0,229,255,0.4); border-radius: 12px; padding: 4px 8px; font-size: 11px; outline: none; font-weight: bold; cursor: pointer;">
+          <option value="0">Ghế 1 (Dưới Trái)</option>
+          <option value="1">Ghế 2 (Dưới Phải)</option>
+          <option value="2">Ghế 3 (Trên Trái)</option>
+          <option value="3">Ghế 4 (Trên Phải)</option>
+        </select>
+      </div>
+
+      <!-- Điều khiển mức cược đạn -->
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <button id="btn-bet-down" class="round-btn" title="Giảm mức đạn">-</button>
+        <div class="bet-control">
+          <span class="bet-label">ĐẠN</span>
+          <span id="bet-value" class="bet-display">10</span>
+        </div>
+        <button id="btn-bet-up" class="round-btn" title="Tăng mức đạn">+</button>
+      </div>
+
+      <!-- Tự động bắn & Nạp xu miễn phí -->
+      <button id="btn-auto-fire" class="arcade-btn" title="Bật/Tắt chế độ tự động bắn liên tục (Phím A)">⚡ Tự động bắn (A)</button>
+      <button id="btn-free-coins" class="arcade-btn gold" title="Nhận ngay 5,000 xu miễn phí">+5,000 Xu Free</button>
+    </footer>
+
+    <!-- Hộp thoại Bảng Trả Thưởng (Paytable) -->
+    <div id="modal-paytable" class="modal-overlay">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-title">📖 BẢNG HỆ SỐ THƯỞNG CÁ</div>
+          <button id="close-paytable" class="close-btn">&times;</button>
+        </div>
+        <div id="paytable-grid" class="fish-grid"></div>
+        <div style="font-size: 12px; line-height: 1.6; color: #b0bec5; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px;">
+          <p><strong style="color: #00ffff;">⚡ Cá Chình Sét:</strong> Phóng tia sét xích tiêu diệt thêm 3-4 cá lân cận!</p>
+          <p><strong style="color: #ff1744;">💥 Cua Mang Bom:</strong> Kích nổ quét sạch toàn bộ cá nhỏ & trung trên màn hình!</p>
+          <p><strong style="color: #ffd700;">👑 Boss Rồng Vàng:</strong> Hệ số thưởng cực đại x250 lần tiền cược đạn!</p>
+          <p><strong style="color: #00e5ff;">🎯 Khóa Mục Tiêu:</strong> Bấm chuột trực tiếp vào con cá bất kỳ trên màn hình để nòng pháo tự bám theo.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hộp thoại Mời Bạn Bè (Invite Modal) -->
+    <div id="modal-invite" class="modal-overlay">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-title">👥 MỜI BẠN BÈ VÀO BÀN BẮN CÁ</div>
+          <button id="close-invite" class="close-btn">&times;</button>
+        </div>
+        <p style="font-size: 13px; color: #cfd8dc; margin-bottom: 8px;">
+          Bàn chơi hỗ trợ tối đa <strong>4 người chơi</strong> cùng lúc. Hãy gửi link dưới đây cho bạn bè:
+        </p>
+        <div class="invite-box">
+          <input id="invite-link-input" class="invite-input" readonly type="text" value="">
+          <button id="btn-copy-link" class="arcade-btn" style="white-space: nowrap;">Sao chép link</button>
+        </div>
+        <div style="font-size: 12px; color: #90a4ae; line-height: 1.5; margin-top: 12px;">
+          <p>💡 <em>Mẹo thử nghiệm nhanh:</em> Bạn có thể mở 2 tab trình duyệt cùng lúc trên máy tính, tab 1 chọn Ghế 1, tab 2 chọn Ghế 2 để thấy 2 nòng pháo bắn cá cùng nhau trong thời gian thực!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

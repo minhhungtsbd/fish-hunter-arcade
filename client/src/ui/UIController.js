@@ -1,0 +1,216 @@
+/**
+ * UIController.js
+ * Quản lý thanh công cụ, các nút bấm điều khiển, hộp thoại trả thưởng,
+ * và chia sẻ phòng chơi cho 4 người.
+ */
+import { FISH_CONFIGS } from '../entities/Fish.js';
+
+export class UIController {
+  constructor(gameEngine) {
+    this.game = gameEngine;
+    this.roomCode = this.getOrGenerateRoomCode();
+    this.initDOM();
+    this.bindEvents();
+    this.updateHUD();
+  }
+
+  getOrGenerateRoomCode() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const existing = urlParams.get('room');
+    if (existing) return existing.toUpperCase();
+
+    // Sinh mã phòng ngẫu nhiên 6 ký tự
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = 'CA';
+    for (let i = 0; i < 4; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
+  }
+
+  initDOM() {
+    // Cập nhật mã phòng lên badge
+    const badge = document.getElementById('room-badge-text');
+    if (badge) badge.innerText = `#PHÒNG: ${this.roomCode}`;
+
+    // Khởi tạo bảng trả thưởng (Paytable)
+    const fishGrid = document.getElementById('paytable-grid');
+    if (fishGrid) {
+      fishGrid.innerHTML = '';
+      for (const [key, cfg] of Object.entries(FISH_CONFIGS)) {
+        const item = document.createElement('div');
+        item.className = 'fish-item';
+        item.innerHTML = `
+          <div>
+            <div class="fish-name" style="color: ${cfg.color}">${cfg.name}</div>
+            <div style="font-size: 10px; color: #aaa;">Máu: ${cfg.hp} đạn</div>
+          </div>
+          <div class="fish-reward">x${cfg.multiplier}</div>
+        `;
+        fishGrid.appendChild(item);
+      }
+    }
+
+    // Cập nhật đường link mời
+    const inviteInput = document.getElementById('invite-link-input');
+    if (inviteInput) {
+      const shareUrl = `${window.location.origin}${window.location.pathname}?room=${this.roomCode}`;
+      inviteInput.value = shareUrl;
+    }
+  }
+
+  bindEvents() {
+    // 1. Chỉnh mức cược đạn +/-
+    const btnBetDown = document.getElementById('btn-bet-down');
+    const btnBetUp = document.getElementById('btn-bet-up');
+    if (btnBetDown) {
+      btnBetDown.addEventListener('click', () => {
+        this.game.cannons[this.game.localSlotId].changeBet(-1);
+        this.updateHUD();
+      });
+    }
+    if (btnBetUp) {
+      btnBetUp.addEventListener('click', () => {
+        this.game.cannons[this.game.localSlotId].changeBet(1);
+        this.updateHUD();
+      });
+    }
+
+    // 2. Nút Tự động bắn (Auto-Fire)
+    const btnAuto = document.getElementById('btn-auto-fire');
+    if (btnAuto) {
+      btnAuto.addEventListener('click', () => {
+        const cannon = this.game.cannons[this.game.localSlotId];
+        cannon.autoFire = !cannon.autoFire;
+        btnAuto.classList.toggle('active', cannon.autoFire);
+      });
+    }
+
+    // 3. Nút Âm thanh (Sound FX)
+    const btnSound = document.getElementById('btn-sound');
+    if (btnSound) {
+      btnSound.addEventListener('click', () => {
+        this.game.audio.init();
+        const isMuted = this.game.audio.toggleMute();
+        btnSound.innerText = isMuted ? '🔇 Tắt tiếng' : '🔊 Âm thanh';
+      });
+    }
+
+    // 4. Nút Nhạc nền (Music)
+    const btnMusic = document.getElementById('btn-music');
+    if (btnMusic) {
+      btnMusic.addEventListener('click', () => {
+        this.game.audio.init();
+        const isPlaying = this.game.audio.toggleMusic();
+        btnMusic.innerText = isPlaying ? '🎵 Nhạc: Bật' : '🎵 Nhạc: Tắt';
+        btnMusic.classList.toggle('active', isPlaying);
+      });
+    }
+
+    // 5. Nút Bật/Tắt Bot 3 ghế trống
+    const btnBots = document.getElementById('btn-toggle-bots');
+    let botsActive = false;
+    if (btnBots) {
+      btnBots.addEventListener('click', () => {
+        botsActive = !botsActive;
+        [1, 2, 3].forEach(slotId => {
+          if (slotId !== this.game.localSlotId) {
+            const cannon = this.game.cannons[slotId];
+            cannon.isBot = botsActive;
+            cannon.isOccupied = botsActive;
+            cannon.playerName = `Bot ${['Hải Tặc', 'Thủy Thủ', 'Ngư Phủ', 'Đại Gia'][slotId]}`;
+          }
+        });
+        btnBots.classList.toggle('active', botsActive);
+        btnBots.innerText = botsActive ? '🤖 Bot: Đang chơi' : '🤖 Bật 3 Bot';
+      });
+    }
+
+    // 6. Nút Nạp 5,000 Xu miễn phí
+    const btnFreeCoins = document.getElementById('btn-free-coins');
+    if (btnFreeCoins) {
+      btnFreeCoins.addEventListener('click', () => {
+        const cannon = this.game.cannons[this.game.localSlotId];
+        cannon.coins += 5000;
+        this.game.audio.playCoin(true);
+        this.game.particles.addFloatingText(cannon.x, cannon.y - 40, '+5,000 XU MIỄN PHÍ!', '#ffd700', 22);
+        this.updateHUD();
+      });
+    }
+
+    // 7. Mở/Đóng Bảng trả thưởng
+    const btnPaytable = document.getElementById('btn-paytable');
+    const modalPaytable = document.getElementById('modal-paytable');
+    const closePaytable = document.getElementById('close-paytable');
+    if (btnPaytable && modalPaytable) {
+      btnPaytable.addEventListener('click', () => modalPaytable.classList.add('open'));
+    }
+    if (closePaytable && modalPaytable) {
+      closePaytable.addEventListener('click', () => modalPaytable.classList.remove('open'));
+    }
+
+    // 8. Mở/Đóng Hộp thoại Mời Bạn Bè
+    const btnInvite = document.getElementById('btn-invite');
+    const modalInvite = document.getElementById('modal-invite');
+    const closeInvite = document.getElementById('close-invite');
+    const btnCopyLink = document.getElementById('btn-copy-link');
+
+    if (btnInvite && modalInvite) {
+      btnInvite.addEventListener('click', () => modalInvite.classList.add('open'));
+    }
+    if (closeInvite && modalInvite) {
+      closeInvite.addEventListener('click', () => modalInvite.classList.remove('open'));
+    }
+    if (btnCopyLink) {
+      btnCopyLink.addEventListener('click', () => {
+        const input = document.getElementById('invite-link-input');
+        if (input) {
+          input.select();
+          navigator.clipboard.writeText(input.value);
+          btnCopyLink.innerText = '✓ Đã sao chép!';
+          setTimeout(() => (btnCopyLink.innerText = 'Sao chép link'), 2000);
+        }
+      });
+    }
+
+    // 9. Nút Toàn màn hình
+    const btnFullscreen = document.getElementById('btn-fullscreen');
+    if (btnFullscreen) {
+      btnFullscreen.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      });
+    }
+
+    // 10. Chọn ghế (Ghế 1, 2, 3, 4)
+    const seatSelect = document.getElementById('seat-select');
+    if (seatSelect) {
+      // Đọc query param `slot` nếu có
+      const urlParams = new URLSearchParams(window.location.search);
+      const slotParam = parseInt(urlParams.get('slot'), 10);
+      if (!isNaN(slotParam) && slotParam >= 0 && slotParam <= 3) {
+        seatSelect.value = slotParam;
+        this.game.setLocalSlot(slotParam);
+      }
+
+      seatSelect.addEventListener('change', (e) => {
+        const slot = parseInt(e.target.value, 10);
+        this.game.setLocalSlot(slot);
+        this.updateHUD();
+      });
+    }
+  }
+
+  updateHUD() {
+    const cannon = this.game.cannons[this.game.localSlotId];
+    if (!cannon) return;
+
+    const betDisplay = document.getElementById('bet-value');
+    if (betDisplay) {
+      betDisplay.innerText = cannon.bet;
+    }
+  }
+}

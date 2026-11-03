@@ -1,0 +1,7 @@
+name = "fish-hunter-signaling"
+main = "src/index.js"
+compatibility_date = "2024-09-23"
+
+# Chạy hoàn toàn trên gói Cloudflare Workers Miễn phí (Free Tier)
+[vars]
+ENVIRONMENT = "production"

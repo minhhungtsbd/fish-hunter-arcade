@@ -1,0 +1,307 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body, html {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #000c14;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #ffffff;
+}
+
+#game-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at center, #06324a 0%, #00121d 100%);
+}
+
+#game-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: crosshair;
+}
+
+/* Thanh điều khiển trên cùng (Top Arcade Bar) */
+.top-bar {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.top-bar > * {
+  pointer-events: auto;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(4, 18, 33, 0.85);
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(0, 229, 255, 0.4);
+  box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
+}
+
+.brand-title {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  background: linear-gradient(45deg, #00e5ff, #ffd700);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.room-badge {
+  font-size: 11px;
+  background: rgba(0, 229, 255, 0.15);
+  color: #00e5ff;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.top-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.arcade-btn {
+  background: linear-gradient(180deg, #163854 0%, #092032 100%);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+}
+
+.arcade-btn:hover {
+  background: linear-gradient(180deg, #1f4e75 0%, #0e304c 100%);
+  border-color: #00e5ff;
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+.arcade-btn:active {
+  transform: translateY(1px);
+}
+
+.arcade-btn.gold {
+  background: linear-gradient(180deg, #ffb300 0%, #f57f17 100%);
+  border-color: #ffd700;
+  color: #000000;
+  font-weight: 800;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
+}
+
+.arcade-btn.gold:hover {
+  background: linear-gradient(180deg, #ffca28 0%, #ff8f00 100%);
+}
+
+.arcade-btn.active {
+  border-color: #00e5ff;
+  background: #00e5ff;
+  color: #000;
+  box-shadow: 0 0 15px #00e5ff;
+}
+
+/* Thanh công cụ người chơi phía dưới (Player Bottom Bar) */
+.bottom-bar {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(3, 16, 29, 0.9);
+  padding: 6px 16px;
+  border-radius: 24px;
+  border: 1px solid rgba(0, 229, 255, 0.35);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+  z-index: 10;
+  pointer-events: auto;
+}
+
+.bet-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 4px 10px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.bet-label {
+  font-size: 11px;
+  color: #81d4fa;
+  font-weight: 700;
+}
+
+.bet-display {
+  font-family: "Impact", "Arial Black", sans-serif;
+  color: #ffd700;
+  font-size: 17px;
+  min-width: 55px;
+  text-align: center;
+}
+
+.round-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: #0d47a1;
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.round-btn:hover {
+  background: #1976d2;
+  box-shadow: 0 0 8px #00e5ff;
+}
+
+/* Modals */
+.modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 10, 20, 0.75);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.modal-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-card {
+  background: linear-gradient(135deg, #092032 0%, #031422 100%);
+  border: 1px solid #00e5ff;
+  box-shadow: 0 0 30px rgba(0, 229, 255, 0.3);
+  border-radius: 16px;
+  width: 90%;
+  max-width: 520px;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 20px;
+  color: #ffffff;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #00e5ff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px;
+}
+
+/* Bảng cá Paytable Grid */
+.fish-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.fish-item {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.fish-name {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.fish-reward {
+  font-family: "Impact", sans-serif;
+  color: #ffd700;
+  font-size: 16px;
+}
+
+.invite-box {
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 12px 0;
+}
+
+.invite-input {
+  flex: 1;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 8px 10px;
+  color: #00e5ff;
+  font-family: monospace;
+  font-size: 13px;
+  outline: none;
+}

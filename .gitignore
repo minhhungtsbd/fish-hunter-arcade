@@ -1,0 +1,24 @@
+# Node dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+client/dist/
+dist/
+
+# Cloudflare Wrangler cache
+.wrangler/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment and secrets
+.env
+.env.local
+
+# OS files
+.DS_Store
+Thumbs.db
