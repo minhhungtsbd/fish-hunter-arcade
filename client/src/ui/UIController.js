@@ -69,18 +69,26 @@ export class UIController {
   }
 
   bindEvents() {
-    // 1. Chỉnh mức cược đạn +/-
-    const btnBetDown = document.getElementById('btn-bet-down');
-    const btnBetUp = document.getElementById('btn-bet-up');
-    if (btnBetDown) {
-      btnBetDown.addEventListener('click', () => {
+    // 1. Chỉnh mức cược đạn trong Cài Đặt
+    const btnSettingsBetDown = document.getElementById('btn-settings-bet-down');
+    const btnSettingsBetUp = document.getElementById('btn-settings-bet-up');
+    const settingsBetSelect = document.getElementById('settings-bet-select');
+
+    if (btnSettingsBetDown) {
+      btnSettingsBetDown.addEventListener('click', () => {
         this.game.cannons[this.game.localSlotId].changeBet(-1);
         this.updateHUD();
       });
     }
-    if (btnBetUp) {
-      btnBetUp.addEventListener('click', () => {
+    if (btnSettingsBetUp) {
+      btnSettingsBetUp.addEventListener('click', () => {
         this.game.cannons[this.game.localSlotId].changeBet(1);
+        this.updateHUD();
+      });
+    }
+    if (settingsBetSelect) {
+      settingsBetSelect.addEventListener('change', (e) => {
+        this.game.cannons[this.game.localSlotId].setBet(parseInt(e.target.value, 10));
         this.updateHUD();
       });
     }
@@ -305,6 +313,11 @@ export class UIController {
     const betDisplay = document.getElementById('bet-value');
     if (betDisplay) {
       betDisplay.innerText = cannon.bet;
+    }
+
+    const settingsBetSelect = document.getElementById('settings-bet-select');
+    if (settingsBetSelect) {
+      settingsBetSelect.value = cannon.bet;
     }
 
     const coinsDisplay = document.getElementById('user-coins-display');
