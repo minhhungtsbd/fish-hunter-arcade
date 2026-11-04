@@ -27,33 +27,18 @@
       </div>
     </header>
 
-    <!-- Thanh công cụ người chơi phía dưới -->
+    <!-- Thanh công cụ người chơi phía dưới: Gọn gàng ở giữa, không che 2 pháo người chơi -->
     <footer class="bottom-bar">
-      <div class="seat-picker-box">
-        <span class="seat-picker-label">GHẾ:</span>
-        <select id="seat-select" class="seat-picker-select">
-          <option value="0">Ghế 1 (Dưới Trái)</option>
-          <option value="1">Ghế 2 (Dưới Phải)</option>
-          <option value="2">Ghế 3 (Trên Trái)</option>
-          <option value="3">Ghế 4 (Trên Phải)</option>
-        </select>
-      </div>
-
       <!-- Hiển thị Tổng Xu của người chơi -->
       <div class="user-coins-box" title="Tổng số xu của bạn">
-        <span style="font-size: 16px;">💰</span>
-        <span class="user-coins-label">XU:</span>
+        <span style="font-size: 15px;">💰</span>
         <span id="user-coins-display" class="user-coins-num">10,000</span>
       </div>
 
-      <!-- Năng lượng tích nộ & Nút Buzz Bom -->
-      <div class="energy-box" title="Bắn đạn và bắt cá để tích năng lượng. Đạt 100% kích hoạt Buzz Bom quét sạch màn hình!">
-        <div class="energy-bar-wrap">
-          <div id="energy-progress" class="energy-progress-fill" style="width: 0%;"></div>
-          <span id="energy-text" class="energy-text">⚡ NỘ: 0%</span>
-        </div>
-        <button id="btn-buzz-bomb" class="buzz-bomb-btn" title="Kích hoạt Buzz Bom Nguyên Tử khi đầy 100% (Phím B)">💥 BUZZ BOM</button>
-      </div>
+      <!-- Năng lượng tích nộ & Nút Buzz Bom thông minh (hiện % nộ và nhấp nháy khi đầy 100%) -->
+      <button id="btn-buzz-bomb" class="buzz-bomb-btn" title="Bắn cá tích năng lượng. Đạt 100% kích hoạt Buzz Bom (Phím B)">
+        <span id="energy-text">⚡ NỘ: 0%</span>
+      </button>
 
       <!-- Badge hiển thị Đạn Tiếp Tế Đặc Biệt -->
       <div id="special-ammo-badge" class="special-ammo-badge" style="display: none;">
@@ -70,9 +55,12 @@
         <button id="btn-bet-up" class="round-btn" title="Tăng mức cược">+</button>
       </div>
 
-      <!-- Tự động bắn & Nạp xu miễn phí -->
-      <button id="btn-auto-fire" class="arcade-btn" title="Bật/Tắt chế độ tự động bắn liên tục (Phím A)"><span class="btn-icon">⚡</span><span class="btn-text"> Tự động</span></button>
-      <button id="btn-free-coins" class="arcade-btn gold" title="Giải đố Toán & Tiếng Anh để nhận 2,000 - 3,000 xu miễn phí!">🧠 Nhận Xu</button>
+      <!-- Tự động bắn -->
+      <button id="btn-auto-fire" class="arcade-btn" title="Bật/Tắt chế độ tự động bắn liên tục (Phím A)">
+        <span class="btn-icon">⚡</span>
+        <span class="btn-text"> Tự động</span>
+      </button>
+
       <!-- Nút Bắn Nhanh dành riêng cho Mobile -->
       <button id="btn-mobile-fire" class="mobile-shoot-btn" title="Chạm để bắn liên thanh">🎯 BẮN</button>
     </footer>

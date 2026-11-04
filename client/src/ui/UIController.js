@@ -322,7 +322,7 @@ export class UIController {
     if (energyText) energyText.innerText = `⚡ NỘ: ${pct}%`;
     if (btnBuzz) {
       btnBuzz.classList.toggle('ready', pct >= 100);
-      btnBuzz.innerText = pct >= 100 ? '💥 BUZZ BOM!' : '💥 BUZZ BOM';
+      btnBuzz.innerHTML = pct >= 100 ? '💥 BUZZ BOM!' : `⚡ NỘ: ${pct}%`;
     }
 
     // Cập nhật Badge Đạn Tiếp Tế Đặc Biệt

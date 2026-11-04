@@ -10,10 +10,10 @@ import { Bullet } from './Bullet.js';
 export const BET_STEPS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 30, 50, 75, 100, 200, 500, 1000];
 
 export const SLOT_CONFIGS = [
-  { id: 0, name: 'Người Chơi 1', color: '#00e5ff', posRatio: { x: 0.28, y: 1.0 }, defaultAngle: -Math.PI / 2 },
-  { id: 1, name: 'Người Chơi 2', color: '#ff9100', posRatio: { x: 0.72, y: 1.0 }, defaultAngle: -Math.PI / 2 },
-  { id: 2, name: 'Người Chơi 3', color: '#e040fb', posRatio: { x: 0.28, y: 0.0 }, defaultAngle: Math.PI / 2 },
-  { id: 3, name: 'Người Chơi 4', color: '#76ff03', posRatio: { x: 0.72, y: 0.0 }, defaultAngle: Math.PI / 2 },
+  { id: 0, name: 'Người Chơi 1', color: '#00e5ff', posRatio: { x: 0.18, y: 1.0 }, defaultAngle: -Math.PI / 2 },
+  { id: 1, name: 'Người Chơi 2', color: '#ff9100', posRatio: { x: 0.82, y: 1.0 }, defaultAngle: -Math.PI / 2 },
+  { id: 2, name: 'Người Chơi 3', color: '#e040fb', posRatio: { x: 0.18, y: 0.0 }, defaultAngle: Math.PI / 2 },
+  { id: 3, name: 'Người Chơi 4', color: '#76ff03', posRatio: { x: 0.82, y: 0.0 }, defaultAngle: Math.PI / 2 },
 ];
 
 export class Cannon {
@@ -55,15 +55,15 @@ export class Cannon {
   resize(width, height) {
     const isNarrow = width < 850;
     let ratioX = this.config.posRatio.x;
-    // Trên màn hình hẹp/di động: đẩy pháo ra gần 2 mép hơn để không chạm vào thanh công cụ ở giữa
+    // Trên màn hình hẹp/di động: đẩy pháo ra gần 2 mép hơn để luôn giữ khoảng trống ở giữa
     if (isNarrow) {
-      if (this.slotId === 0 || this.slotId === 2) ratioX = 0.16;
-      if (this.slotId === 1 || this.slotId === 3) ratioX = 0.84;
+      if (this.slotId === 0 || this.slotId === 2) ratioX = 0.14;
+      if (this.slotId === 1 || this.slotId === 3) ratioX = 0.86;
     }
     this.x = width * ratioX;
     this.y = height * this.config.posRatio.y;
     // Tỉ lệ scale pháo theo kích thước màn hình
-    this.scale = Math.min(1.0, Math.max(0.68, width / 950));
+    this.scale = Math.min(1.0, Math.max(0.68, width / 1100));
   }
 
   changeBet(direction) {

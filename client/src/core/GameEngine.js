@@ -89,10 +89,24 @@ export class GameEngine {
       this.audio.init(); // Mở khóa Web Audio API lần đầu chạm
       this.isPointerDown = true;
       const pos = getPos(e);
+
+      // 1. Kiểm tra nếu người chơi bấm vào ghế trống -> Chuyển sang ghế đó
+      for (const cannon of this.cannons) {
+        if (!cannon.isOccupied) {
+          const distToSlot = Math.hypot(cannon.x - pos.x, cannon.y - pos.y);
+          if (distToSlot < 48) {
+            this.setLocalSlot(cannon.slotId);
+            if (this.ui) this.ui.updateHUD();
+            this.particles.addFloatingText(cannon.x, cannon.y - (cannon.slotId < 2 ? 60 : -60), `🪑 ĐÃ CHUYỂN ${cannon.playerName.toUpperCase()}`, '#00e5ff', 18);
+            return;
+          }
+        }
+      }
+
       const localCannon = this.cannons[this.localSlotId];
       if (!localCannon) return;
 
-      // Kiểm tra xem người chơi có click trúng con cá nào để Khóa Mục Tiêu (Lock-On) không
+      // 2. Kiểm tra xem người chơi có click trúng con cá nào để Khóa Mục Tiêu (Lock-On) không
       let clickedFish = null;
       for (const fish of this.spawner.fishes) {
         if (!fish.isDead && Math.hypot(fish.x - pos.x, fish.y - pos.y) <= fish.radius + 18) {
@@ -688,13 +702,13 @@ export class GameEngine {
     }
     ctx.restore();
 
-    // Rạn san hô trang trí ở 2 bên góc đáy
+    // Lớp đáy cát biển sâu tự nhiên (Subtle Ocean Bed Floor)
     ctx.save();
-    ctx.fillStyle = '#063a56';
-    ctx.beginPath();
-    ctx.arc(80, this.height + 20, 110, 0, Math.PI * 2);
-    ctx.arc(this.width - 80, this.height + 20, 110, 0, Math.PI * 2);
-    ctx.fill();
+    const floorGrad = ctx.createLinearGradient(0, this.height - 35, 0, this.height);
+    floorGrad.addColorStop(0, 'transparent');
+    floorGrad.addColorStop(1, 'rgba(2, 24, 43, 0.45)');
+    ctx.fillStyle = floorGrad;
+    ctx.fillRect(0, this.height - 35, this.width, 35);
     ctx.restore();
   }
 }
