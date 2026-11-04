@@ -28,8 +28,8 @@ export class Cannon {
     this.isBot = false;             // Chế độ Bot
     this.playerName = this.config.name;
 
-    this.coins = 10000;             // 10,000 xu ban đầu
-    this.betIndex = 9;              // Mức cược ban đầu = 10 xu (cho phép chọn từ 1 đến 1000)
+    this.coins = 200;               // Khởi đầu 200 xu (thử thách, bắn có chiến thuật, hết xu giải đố nhận thêm)
+    this.betIndex = 2;              // Mức cược ban đầu = 3 xu (trong dải cược 1, 2, 3, 4, 5, 6...)
     this.bet = BET_STEPS[this.betIndex];
 
     this.energy = 0;                // Năng lượng tích nộ Buzz Bom (0 -> 100%)
@@ -235,7 +235,7 @@ export class Cannon {
         }
         if (this.botTarget && !this.botTarget.isDead) {
           this.aimAt(this.botTarget.x, this.botTarget.y);
-          if (this.coins < 200) this.coins += 5000; // Bot tự nạp xu khi cạn
+          if (this.coins < this.bet) this.coins += 200; // Bot tự nạp 200 xu khi cạn
           if (Math.random() < 0.85) {
             return this.shoot();
           }

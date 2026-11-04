@@ -98,14 +98,14 @@
               <select id="settings-bet-select" class="arcade-select settings-control" style="min-width: 120px; text-align: center;">
                 <option value="1">1 Xu</option>
                 <option value="2">2 Xu</option>
-                <option value="3">3 Xu</option>
+                <option value="3" selected>3 Xu</option>
                 <option value="4">4 Xu</option>
                 <option value="5">5 Xu</option>
                 <option value="6">6 Xu</option>
                 <option value="7">7 Xu</option>
                 <option value="8">8 Xu</option>
                 <option value="9">9 Xu</option>
-                <option value="10" selected>10 Xu</option>
+                <option value="10">10 Xu</option>
                 <option value="15">15 Xu</option>
                 <option value="20">20 Xu</option>
                 <option value="30">30 Xu</option>
@@ -188,7 +188,7 @@
             <button id="btn-fullscreen" class="arcade-btn settings-action-btn" title="Bật/Tắt Toàn Màn Hình">
               <span class="btn-icon">⛶</span> Toàn Màn Hình
             </button>
-            <button id="btn-settings-quiz" class="arcade-btn gold settings-action-btn" title="Giải đố nhận 2,000 - 3,000 xu">
+            <button id="btn-settings-quiz" class="arcade-btn gold settings-action-btn" title="Giải đố nhận 100 - 150 xu">
               <span class="btn-icon">🧠</span> Cứu Trợ Xu
             </button>
           </div>
@@ -245,7 +245,7 @@
           <button id="close-quiz" class="close-btn">&times;</button>
         </div>
 
-        <p class="quiz-subtext">Trả lời đúng để nhận <strong>+2,000 đến +3,000 Xu</strong> miễn phí! Trả lời sai sẽ tự động đổi câu khác.</p>
+        <p class="quiz-subtext">Trả lời đúng để nhận <strong>+100 đến +150 Xu</strong> miễn phí! Trả lời sai sẽ tự động đổi câu khác.</p>
 
         <!-- Khung Câu Hỏi -->
         <div id="quiz-question-box" class="quiz-question-box">
@@ -261,7 +261,7 @@
 
         <!-- Khung Chúc mừng Thành công -->
         <div id="quiz-success-box" class="quiz-success-box" style="display: none;">
-          <div class="quiz-reward-text">🎉 CHÍNH XÁC! BẠN NHẬN ĐƯỢC <span id="quiz-reward-amount">+3,000</span> XU!</div>
+          <div class="quiz-reward-text">🎉 CHÍNH XÁC! BẠN NHẬN ĐƯỢC <span id="quiz-reward-amount">+150</span> XU!</div>
           <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
             <button id="btn-quiz-continue-game" class="arcade-btn gold" style="padding: 10px 18px; font-size: 13px;">🎮 Vào Bắn Cá Tiếp</button>
             <button id="btn-quiz-another" class="arcade-btn" style="padding: 10px 18px; font-size: 13px;">🧠 Đố Thêm Câu Nữa</button>

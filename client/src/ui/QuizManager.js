@@ -45,7 +45,7 @@ export class QuizManager {
     this.rewardAmount = document.getElementById('quiz-reward-amount');
 
     this.currentCorrectIndex = 0;
-    this.currentReward = 3000;
+    this.currentReward = 150;
     this.isAnswering = false;
 
     this.bindEvents();
@@ -102,7 +102,7 @@ export class QuizManager {
 
   // 1. Sinh câu hỏi Phép tính Cộng / Trừ
   generateMathQuestion() {
-    this.currentReward = 2500;
+    this.currentReward = 100;
     const isAdd = Math.random() > 0.45;
     let a, b, answer, questionStr;
 
@@ -137,7 +137,7 @@ export class QuizManager {
 
   // 2. Sinh câu hỏi Từ vựng Tiếng Anh qua hình ảnh
   generateEnglishQuestion() {
-    this.currentReward = 3000;
+    this.currentReward = 150;
     const correctItem = ENGLISH_VOCABULARY[Math.floor(Math.random() * ENGLISH_VOCABULARY.length)];
 
     if (this.iconDisplay) this.iconDisplay.innerText = correctItem.icon;
