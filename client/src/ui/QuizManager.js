@@ -100,35 +100,48 @@ export class QuizManager {
     }
   }
 
-  // 1. Sinh câu hỏi Phép tính Cộng / Trừ
+  // 1. Sinh câu hỏi Phép tính Cộng / Trừ (Phù hợp cho bé lớp 1 & lớp 2: số nhỏ trong phạm vi 10 - 20)
   generateMathQuestion() {
-    this.currentReward = 100;
-    const isAdd = Math.random() > 0.45;
+    this.currentReward = 200; // Thưởng 200 xu cứu trợ
+    const isAdd = Math.random() > 0.5;
     let a, b, answer, questionStr;
 
     if (isAdd) {
-      a = Math.floor(10 + Math.random() * 45);
-      b = Math.floor(8 + Math.random() * 45);
+      // Phép cộng lớp 1 & lớp 2: Các số nhỏ 1 đến 9, tổng không vượt quá 18
+      a = Math.floor(1 + Math.random() * 9); // 1 đến 9
+      b = Math.floor(1 + Math.random() * 9); // 1 đến 9
       answer = a + b;
       questionStr = `Em hãy tính:  ${a}  +  ${b}  =  ?`;
     } else {
-      a = Math.floor(30 + Math.random() * 65);
-      b = Math.floor(10 + Math.random() * (a - 15));
-      answer = a - b;
+      // Phép trừ lớp 1 & lớp 2: Kết quả và số trừ là số nhỏ 1 đến 9
+      answer = Math.floor(1 + Math.random() * 9); // 1 đến 9
+      b = Math.floor(1 + Math.random() * 9);      // 1 đến 9
+      a = answer + b;                             // a từ 2 đến 18 (luôn lớn hơn b)
       questionStr = `Em hãy tính:  ${a}  -  ${b}  =  ?`;
     }
 
     if (this.iconDisplay) this.iconDisplay.innerText = '🔢';
     if (this.promptText) this.promptText.innerText = questionStr;
 
-    // Sinh 4 phương án (1 đúng, 3 sai)
+    // Sinh 4 phương án nhỏ gần kề kết quả (sai lệch ±1, ±2, ±3, luôn > 0)
     const options = [answer];
-    while (options.length < 4) {
-      const offset = (Math.floor(Math.random() * 5) + 1) * (Math.random() > 0.5 ? 1 : -1) * (Math.random() > 0.5 ? 1 : 10);
+    const candidateOffsets = [-2, 1, -1, 2, 3, -3].sort(() => Math.random() - 0.5);
+
+    for (const offset of candidateOffsets) {
+      if (options.length >= 4) break;
       const fake = answer + offset;
       if (fake > 0 && !options.includes(fake)) {
         options.push(fake);
       }
+    }
+
+    // Nếu vẫn chưa đủ 4 phương án, bù các số nhỏ tự nhiên khác
+    let fallbackNum = 1;
+    while (options.length < 4) {
+      if (!options.includes(fallbackNum) && fallbackNum !== answer) {
+        options.push(fallbackNum);
+      }
+      fallbackNum++;
     }
 
     // Trộn ngẫu nhiên

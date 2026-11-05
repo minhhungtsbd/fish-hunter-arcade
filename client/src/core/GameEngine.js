@@ -90,14 +90,51 @@ export class GameEngine {
       this.isPointerDown = true;
       const pos = getPos(e);
 
-      // 1. Kiểm tra nếu người chơi bấm vào ghế trống -> Chuyển sang ghế đó
+      // 1. Kiểm tra nếu người chơi bấm vào ghế trống hoặc ghế Bot trực tiếp trên màn hình:
+      // Bấm ghế trống -> Thêm Bot vào chơi
+      // Bấm ghế Bot -> Tắt Bot (trả về ghế trống)
+      // Người chơi thật (local player) KHÔNG bị ảnh hưởng, không bị đổi ghế hay treo súng!
       for (const cannon of this.cannons) {
-        if (!cannon.isOccupied) {
-          const distToSlot = Math.hypot(cannon.x - pos.x, cannon.y - pos.y);
-          if (distToSlot < 48) {
-            this.setLocalSlot(cannon.slotId);
-            if (this.ui) this.ui.updateHUD();
-            this.particles.addFloatingText(cannon.x, cannon.y - (cannon.slotId < 2 ? 60 : -60), `🪑 ĐÃ CHUYỂN ${cannon.playerName.toUpperCase()}`, '#00e5ff', 18);
+        if (cannon.slotId === this.localSlotId) continue; // Không thao tác trên ghế của chính mình
+
+        const isBottom = cannon.slotId === 0 || cannon.slotId === 1;
+        const s = cannon.scale || 1.0;
+        const hudY = isBottom ? cannon.y - (65 * s) : cannon.y + (45 * s);
+        const distToBase = Math.hypot(cannon.x - pos.x, cannon.y - pos.y);
+        const clickedOnBase = distToBase <= 55 * s;
+        const clickedOnHUD = Math.abs(pos.x - cannon.x) <= 85 * s && Math.abs(pos.y - hudY) <= 30 * s;
+
+        if (clickedOnBase || clickedOnHUD) {
+          if (cannon.isBot) {
+            // TẮT BOT (Đổi thành Ghế Trống)
+            cannon.isOccupied = false;
+            cannon.isBot = false;
+            this.audio.playHit();
+            this.particles.addFloatingText(
+              cannon.x,
+              cannon.y - (cannon.slotId < 2 ? 60 : -60),
+              `🚪 ĐÃ TẮT ${cannon.playerName} (GHẾ TRỐNG)`,
+              '#ff9100',
+              18
+            );
+            this.syncBotCountUI();
+            return;
+          } else if (!cannon.isOccupied) {
+            // BẬT BOT (Thêm Bot vào chơi)
+            cannon.isOccupied = true;
+            cannon.isBot = true;
+            cannon.isLocal = false;
+            cannon.coins = 200;
+            cannon.playerName = `Bot ${['Hải Tặc', 'Thủy Thủ', 'Ngư Phủ', 'Đại Gia'][cannon.slotId]}`;
+            this.audio.playShoot(1);
+            this.particles.addFloatingText(
+              cannon.x,
+              cannon.y - (cannon.slotId < 2 ? 60 : -60),
+              `🤖 ĐÃ BẬT ${cannon.playerName}!`,
+              '#00e5ff',
+              18
+            );
+            this.syncBotCountUI();
             return;
           }
         }
@@ -118,12 +155,18 @@ export class GameEngine {
       if (clickedFish) {
         if (localCannon.lockedTarget === clickedFish) {
           localCannon.lockedTarget = null;
+          this.particles.addFloatingText(clickedFish.x, clickedFish.y - 25, '🔓 ĐÃ MỞ KHÓA MỤC TIÊU', '#ffe082', 15);
         } else {
           localCannon.lockedTarget = clickedFish;
           localCannon.aimAt(clickedFish.x, clickedFish.y);
           this.particles.addFloatingText(clickedFish.x, clickedFish.y - 25, '🎯 ĐÃ KHÓA MỤC TIÊU', '#00e5ff', 16);
         }
       } else {
+        // Bấm vào khoảng trống biển -> Nếu đang khóa mục tiêu thì mở khóa ngay để nòng súng tự do quay theo chuột
+        if (localCannon.lockedTarget) {
+          localCannon.lockedTarget = null;
+          this.particles.addFloatingText(localCannon.x, localCannon.y - (localCannon.slotId < 2 ? 80 : -80), '🔓 ĐÃ MỞ KHÓA', '#ffe082', 15);
+        }
         localCannon.aimAt(pos.x, pos.y);
       }
 
@@ -182,6 +225,18 @@ export class GameEngine {
         this.triggerBuzzBomb();
       }
     });
+  }
+
+  // Đồng bộ số lượng bot sang thanh cài đặt
+  syncBotCountUI() {
+    const activeBots = this.cannons.filter(c => c.isBot).length;
+    const botSelect = document.getElementById('bot-count-select');
+    if (botSelect) {
+      botSelect.value = String(activeBots);
+    }
+    if (this.ui) {
+      this.ui.updateHUD();
+    }
   }
 
   // Tùy chọn bật 0, 1, 2 hoặc 3 Bot
@@ -266,6 +321,13 @@ export class GameEngine {
   }
 
   setLocalSlot(slotId) {
+    const oldLocal = this.cannons[this.localSlotId];
+    if (oldLocal && oldLocal.slotId !== slotId) {
+      oldLocal.isLocal = false;
+      oldLocal.isOccupied = false;
+      oldLocal.isBot = false;
+    }
+
     this.localSlotId = slotId;
     this.cannons.forEach((c, idx) => {
       c.isLocal = idx === slotId;
@@ -274,6 +336,7 @@ export class GameEngine {
         c.isBot = false;
       }
     });
+    if (this.ui) this.ui.updateHUD();
   }
 
   start() {

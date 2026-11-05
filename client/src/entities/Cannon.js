@@ -392,19 +392,35 @@ export class Cannon {
   }
 
   renderEmptySlot(ctx) {
+    const s = this.scale || 1.0;
     ctx.save();
     ctx.translate(this.x, this.y);
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.scale(s, s);
+
+    // Vành tròn nét đứt mời gọi thêm Bot
+    ctx.strokeStyle = 'rgba(0, 229, 255, 0.45)';
     ctx.lineWidth = 2;
     ctx.setLineDash([6, 6]);
     ctx.beginPath();
-    ctx.arc(0, 0, 32, 0, Math.PI * 2);
+    ctx.arc(0, 0, 34, 0, Math.PI * 2);
     ctx.stroke();
 
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-    ctx.font = 'bold 12px sans-serif';
+    // Nền mờ bấm được
+    ctx.fillStyle = 'rgba(0, 229, 255, 0.1)';
+    ctx.beginPath();
+    ctx.arc(0, 0, 34, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Dấu + và nhãn THÊM BOT
+    ctx.fillStyle = '#00e5ff';
+    ctx.font = 'bold 18px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('GHẾ TRỐNG', 0, 4);
+    ctx.textBaseline = 'middle';
+    ctx.fillText('+', 0, -8);
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+    ctx.font = 'bold 10px sans-serif';
+    ctx.fillText('THÊM BOT', 0, 10);
     ctx.restore();
   }
 
@@ -451,6 +467,13 @@ export class Cannon {
     ctx.font = 'bold 10px sans-serif';
     const weaponText = this.specialWeapon ? `📦 ${this.specialWeapon} x${this.specialAmmo}` : `Đạn: ${this.bet} xu`;
     ctx.fillText(weaponText, 0, isBottom ? -26 : 28);
+
+    // Gợi ý bấm để tắt nếu là máy Bot
+    if (this.isBot) {
+      ctx.fillStyle = '#ffb74d';
+      ctx.font = 'bold 9px sans-serif';
+      ctx.fillText('(Bấm để tắt Bot)', 0, isBottom ? 26 : -24);
+    }
 
     ctx.restore();
   }
