@@ -128,9 +128,9 @@ export class GameEngine {
       }
 
       // Bắn phát đạn đầu tiên
-      const bullet = localCannon.shoot();
-      if (bullet) {
-        this.bullets.push(bullet);
+      const bullets = localCannon.shoot();
+      if (bullets) {
+        this.addBullets(bullets);
         if (this.ui) this.ui.updateHUD();
       }
     };
@@ -158,9 +158,9 @@ export class GameEngine {
       if (!localCannon) return;
 
       if (e.code === 'Space') {
-        const bullet = localCannon.shoot();
-        if (bullet) {
-          this.bullets.push(bullet);
+        const bullets = localCannon.shoot();
+        if (bullets) {
+          this.addBullets(bullets);
           if (this.ui) this.ui.updateHUD();
         }
       } else if (e.code === 'ArrowUp' || e.code === 'KeyW' || e.key === '+') {
@@ -300,12 +300,21 @@ export class GameEngine {
     requestAnimationFrame(this.loop.bind(this));
   }
 
+  addBullets(bullets) {
+    if (!bullets) return;
+    if (Array.isArray(bullets)) {
+      this.bullets.push(...bullets);
+    } else {
+      this.bullets.push(bullets);
+    }
+  }
+
   update(dt) {
     // 1. Cập nhật 4 Pháo (bắn tự động hoặc bot bắn)
     for (const cannon of this.cannons) {
-      const bullet = cannon.update(dt, this.spawner.fishes);
-      if (bullet) {
-        this.bullets.push(bullet);
+      const bullets = cannon.update(dt, this.spawner.fishes);
+      if (bullets) {
+        this.addBullets(bullets);
       }
     }
 
@@ -313,9 +322,9 @@ export class GameEngine {
     if (this.isPointerDown) {
       const localCannon = this.cannons[this.localSlotId];
       if (localCannon && localCannon.canShoot()) {
-        const bullet = localCannon.shoot();
-        if (bullet) {
-          this.bullets.push(bullet);
+        const bullets = localCannon.shoot();
+        if (bullets) {
+          this.addBullets(bullets);
           if (this.ui) this.ui.updateHUD();
         }
       }
@@ -324,7 +333,7 @@ export class GameEngine {
     // 2. Cập nhật Đạn
     for (let i = this.bullets.length - 1; i >= 0; i--) {
       const b = this.bullets[i];
-      b.update(dt, this.width, this.height);
+      b.update(dt, this.width, this.height, this.spawner.fishes);
 
       // Kiểm tra va chạm đạn với Hộp Đạn tiếp tế
       let hitBox = null;

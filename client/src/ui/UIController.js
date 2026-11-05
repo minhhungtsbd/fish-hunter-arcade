@@ -69,7 +69,22 @@ export class UIController {
   }
 
   bindEvents() {
-    // 1. Chỉnh mức cược đạn trong Cài Đặt
+    // 1. Chỉnh mức cược đạn trên Thanh Dưới & trong Bảng Cài Đặt
+    const btnBetDown = document.getElementById('btn-bet-down');
+    const btnBetUp = document.getElementById('btn-bet-up');
+    if (btnBetDown) {
+      btnBetDown.addEventListener('click', () => {
+        this.game.cannons[this.game.localSlotId].changeBet(-1);
+        this.updateHUD();
+      });
+    }
+    if (btnBetUp) {
+      btnBetUp.addEventListener('click', () => {
+        this.game.cannons[this.game.localSlotId].changeBet(1);
+        this.updateHUD();
+      });
+    }
+
     const btnSettingsBetDown = document.getElementById('btn-settings-bet-down');
     const btnSettingsBetUp = document.getElementById('btn-settings-bet-up');
     const settingsBetSelect = document.getElementById('settings-bet-select');
@@ -278,9 +293,9 @@ export class UIController {
         this.game.audio.init();
         const localCannon = this.game.cannons[this.game.localSlotId];
         if (localCannon) {
-          const bullet = localCannon.shoot();
-          if (bullet) {
-            this.game.bullets.push(bullet);
+          const bullets = localCannon.shoot();
+          if (bullets) {
+            this.game.addBullets(bullets);
             this.updateHUD();
           }
         }
@@ -335,17 +350,25 @@ export class UIController {
     if (energyText) energyText.innerText = `⚡ NỘ: ${pct}%`;
     if (btnBuzz) {
       btnBuzz.classList.toggle('ready', pct >= 100);
-      btnBuzz.innerHTML = pct >= 100 ? '💥 BUZZ BOM!' : `⚡ NỘ: ${pct}%`;
+      btnBuzz.innerHTML = pct >= 100 ? '💥 BUZZ BOM!' : '💥 BUZZ BOM';
     }
 
-    // Cập nhật Badge Đạn Tiếp Tế Đặc Biệt
+    // Cập nhật Badge Đạn Tiếp Tế Đặc Biệt (6 loại đạn)
     const ammoBadge = document.getElementById('special-ammo-badge');
     const ammoText = document.getElementById('special-ammo-text');
     if (ammoBadge && ammoText) {
       if (cannon.specialWeapon && cannon.specialAmmo > 0) {
         ammoBadge.style.display = 'inline-flex';
-        const icons = { LASER: '⚡', FROST: '❄️', CLUSTER: '💥' };
-        ammoText.innerText = `${icons[cannon.specialWeapon] || '📦'} ${cannon.specialWeapon} x${cannon.specialAmmo}`;
+        const weaponMap = {
+          DOUBLE: { icon: '⚡⚡', name: 'ĐẠN 2 NÒNG' },
+          TRIPLE: { icon: '🔱', name: 'ĐẠN 3 NÒNG' },
+          MISSILE: { icon: '🚀', name: 'TÊN LỬA' },
+          CLUSTER: { icon: '💥', name: 'ĐẠN CHÙM' },
+          LASER: { icon: '⚡', name: 'LASER' },
+          FROST: { icon: '❄️', name: 'BĂNG GIÁ' },
+        };
+        const info = weaponMap[cannon.specialWeapon] || { icon: '📦', name: cannon.specialWeapon };
+        ammoText.innerText = `${info.icon} ${info.name} x${cannon.specialAmmo}`;
       } else {
         ammoBadge.style.display = 'none';
       }

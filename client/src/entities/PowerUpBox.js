@@ -2,32 +2,56 @@
  * PowerUpBox.js
  * Hộp đạn tiếp tế ngẫu nhiên trôi nổi trong đại dương.
  * Khi người chơi bắn vỡ hộp đạn sẽ được nâng cấp loại đạn đặc biệt:
- * 1. LASER: Đạn tia xuyên thấu qua mọi con cá trên đường bay
- * 2. FROST: Đạn băng giá làm đông cứng và chậm 70% cá trong vùng lưới
- * 3. CLUSTER: Đạn chùm phân mảnh tạo 3 lưới năng lượng nổ liên tiếp
+ * 1. DOUBLE: Đạn 2 nòng bắn song song tăng gấp đôi hỏa lực
+ * 2. TRIPLE: Đạn 3 nòng bắn tỏa quạt quét sạch đàn cá rộng lớn
+ * 3. MISSILE: Tên lửa tầm nhiệt tự động bám đuổi theo cá và nổ cực mạnh diện rộng
+ * 4. CLUSTER: Đạn chùm phân mảnh tạo 5 lưới năng lượng nổ liên tiếp
+ * 5. LASER: Đạn tia xuyên thấu qua mọi con cá trên đường bay
+ * 6. FROST: Đạn băng giá làm đông cứng và chậm 70% cá trong vùng lưới
  */
 
 export const WEAPON_TYPES = {
+  DOUBLE: {
+    name: 'ĐẠN 2 NÒNG SONG SONG',
+    icon: '⚡⚡',
+    color: '#00e5ff',
+    ammoCount: 25,
+    desc: 'Bắn 2 viên đạn song song tăng gấp đôi hỏa lực!',
+  },
+  TRIPLE: {
+    name: 'ĐẠN 3 NÒNG TỎA QUẠT',
+    icon: '🔱',
+    color: '#ffd700',
+    ammoCount: 20,
+    desc: 'Bắn 3 viên đạn tỏa quạt quét sạch đàn cá!',
+  },
+  MISSILE: {
+    name: 'TÊN LỬA TẦM NHIỆT',
+    icon: '🚀',
+    color: '#ff1744',
+    ammoCount: 14,
+    desc: 'Tự động đuổi theo cá và phát nổ cực mạnh diện rộng!',
+  },
+  CLUSTER: {
+    name: 'ĐẠN CHÙM BÙNG NỔ',
+    icon: '💥',
+    color: '#ff9100',
+    ammoCount: 16,
+    desc: 'Tách làm 5 lưới nổ liên hoàn bao trọn đàn cá!',
+  },
   LASER: {
     name: 'ĐẠN LASER XUYÊN THẤU',
     icon: '⚡',
-    color: '#00e5ff',
-    ammoCount: 20,
-    desc: 'Bắn tia laser xuyên táo mọi con cá!',
+    color: '#76ff03',
+    ammoCount: 22,
+    desc: 'Bắn tia laser cực nhanh xuyên thủng qua mọi con cá!',
   },
   FROST: {
     name: 'ĐẠN BĂNG ĐÔNG CỨNG',
     icon: '❄️',
     color: '#80d8ff',
     ammoCount: 18,
-    desc: 'Lưới băng làm đông cứng & giảm 70% tốc độ cá!',
-  },
-  CLUSTER: {
-    name: 'ĐẠN CHÙM PHÂN MẢNH',
-    icon: '💥',
-    color: '#ff9100',
-    ammoCount: 15,
-    desc: 'Tách làm 3 lưới nổ liên hoàn tăng diện tích bắt!',
+    desc: 'Lưới băng làm đông cứng & giảm 70% tốc độ của cá!',
   },
 };
 
@@ -42,7 +66,7 @@ export class PowerUpBox {
     this.floatTime = Math.random() * 10;
     this.hitTimer = 0;
 
-    // Chọn ngẫu nhiên 1 trong 3 loại vũ khí
+    // Chọn ngẫu nhiên 1 trong 6 loại vũ khí đặc biệt
     const keys = Object.keys(WEAPON_TYPES);
     this.weaponType = keys[Math.floor(Math.random() * keys.length)];
     this.weaponConfig = WEAPON_TYPES[this.weaponType];
@@ -116,7 +140,7 @@ export class PowerUpBox {
     });
 
     // Icon vũ khí ở giữa hộp
-    ctx.font = '20px sans-serif';
+    ctx.font = this.weaponConfig.icon.length > 2 ? '15px sans-serif' : '20px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(this.weaponConfig.icon, 0, 1);

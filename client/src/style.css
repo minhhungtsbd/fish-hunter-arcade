@@ -143,15 +143,65 @@ body, html {
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   background: rgba(3, 16, 29, 0.92);
-  padding: 5px 14px;
+  padding: 5px 12px;
   border-radius: 20px;
   border: 1px solid rgba(0, 229, 255, 0.35);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.85);
   z-index: 10;
   pointer-events: auto;
-  max-width: 280px;
+  max-width: 520px;
+  white-space: nowrap;
+}
+
+.energy-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  padding: 3px 6px;
+  border-radius: 14px;
+}
+
+.energy-bar-wrap {
+  position: relative;
+  width: 80px;
+  height: 18px;
+  background: #092032;
+  border-radius: 9px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.energy-progress-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, #00e5ff 0%, #ffd700 100%);
+  box-shadow: 0 0 10px #00e5ff;
+  transition: width 0.2s ease;
+}
+
+.energy-text {
+  position: relative;
+  font-size: 10px;
+  font-weight: 800;
+  color: #ffffff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.bet-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .user-coins-box {

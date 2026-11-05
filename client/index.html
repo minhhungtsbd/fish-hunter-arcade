@@ -27,23 +27,40 @@
       </div>
     </header>
 
-    <!-- Thanh công cụ người chơi phía dưới: Siêu nhỏ gọn, tối đa không gian cho người chơi -->
+    <!-- Thanh công cụ người chơi phía dưới: Bố cục cân đối chuẩn arcade, tuyệt đối không chạm vào 2 pháo người chơi -->
     <footer class="bottom-bar">
-      <!-- Tự động bắn -->
-      <button id="btn-auto-fire" class="arcade-btn" title="Bật/Tắt chế độ tự động bắn liên tục (Phím A)">
-        <span class="btn-icon">⚡</span>
-        <span class="btn-text"> Tự động</span>
-      </button>
+      <!-- Năng lượng tích nộ & Nút Buzz Bom -->
+      <div class="energy-box" title="Bắn đạn và bắt cá để tích năng lượng. Đạt 100% kích hoạt Buzz Bom quét sạch đàn cá!">
+        <div class="energy-bar-wrap">
+          <div id="energy-progress" class="energy-progress-fill" style="width: 0%;"></div>
+          <span id="energy-text" class="energy-text">⚡ NỘ: 0%</span>
+        </div>
+        <button id="btn-buzz-bomb" class="buzz-bomb-btn" title="Kích hoạt Buzz Bom Nguyên Tử khi đầy 100% (Phím B)">💥 BUZZ BOM</button>
+      </div>
 
       <!-- Badge hiển thị Đạn Tiếp Tế Đặc Biệt -->
       <div id="special-ammo-badge" class="special-ammo-badge" style="display: none;">
         <span id="special-ammo-text">⚡ LASER x20</span>
       </div>
 
-      <!-- Năng lượng tích nộ & Nút Buzz Bom thông minh (hiện % nộ và nhấp nháy khi đầy 100%) -->
-      <button id="btn-buzz-bomb" class="buzz-bomb-btn" title="Bắn cá tích năng lượng. Đạt 100% kích hoạt Buzz Bom (Phím B)">
-        <span id="energy-text">⚡ NỘ: 0%</span>
+      <!-- Điều khiển mức cược đạn nhanh -->
+      <div class="bet-container">
+        <button id="btn-bet-down" class="round-btn" title="Giảm mức cược (Phím S hoặc ↓)">-</button>
+        <div class="bet-control" title="Mức xu tiêu tốn mỗi phát bắn">
+          <span class="bet-label">CƯỢC</span>
+          <span id="bet-value" class="bet-display">3</span>
+        </div>
+        <button id="btn-bet-up" class="round-btn" title="Tăng mức cược (Phím W hoặc ↑)">+</button>
+      </div>
+
+      <!-- Tự động bắn -->
+      <button id="btn-auto-fire" class="arcade-btn" title="Bật/Tắt chế độ tự động bắn liên tục (Phím A)">
+        <span class="btn-icon">⚡</span>
+        <span class="btn-text"> Tự động</span>
       </button>
+
+      <!-- Nạp xu cứu trợ qua mini-game Toán & Tiếng Anh -->
+      <button id="btn-free-coins" class="arcade-btn gold" title="Giải đố Toán & Tiếng Anh để nhận thêm xu miễn phí!">🧠 Nhận Xu</button>
 
       <!-- Nút Bắn Nhanh dành riêng cho Mobile -->
       <button id="btn-mobile-fire" class="mobile-shoot-btn" title="Chạm để bắn liên thanh">🎯 BẮN</button>

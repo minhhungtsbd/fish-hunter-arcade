@@ -10,10 +10,10 @@ import { Bullet } from './Bullet.js';
 export const BET_STEPS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 30, 50, 75, 100, 200, 500, 1000];
 
 export const SLOT_CONFIGS = [
-  { id: 0, name: 'Người Chơi 1', color: '#00e5ff', posRatio: { x: 0.18, y: 1.0 }, defaultAngle: -Math.PI / 2 },
-  { id: 1, name: 'Người Chơi 2', color: '#ff9100', posRatio: { x: 0.82, y: 1.0 }, defaultAngle: -Math.PI / 2 },
-  { id: 2, name: 'Người Chơi 3', color: '#e040fb', posRatio: { x: 0.18, y: 0.0 }, defaultAngle: Math.PI / 2 },
-  { id: 3, name: 'Người Chơi 4', color: '#76ff03', posRatio: { x: 0.82, y: 0.0 }, defaultAngle: Math.PI / 2 },
+  { id: 0, name: 'Người Chơi 1', color: '#00e5ff', posRatio: { x: 0.15, y: 1.0 }, defaultAngle: -Math.PI / 2 },
+  { id: 1, name: 'Người Chơi 2', color: '#ff9100', posRatio: { x: 0.85, y: 1.0 }, defaultAngle: -Math.PI / 2 },
+  { id: 2, name: 'Người Chơi 3', color: '#e040fb', posRatio: { x: 0.15, y: 0.0 }, defaultAngle: Math.PI / 2 },
+  { id: 3, name: 'Người Chơi 4', color: '#76ff03', posRatio: { x: 0.85, y: 0.0 }, defaultAngle: Math.PI / 2 },
 ];
 
 export class Cannon {
@@ -55,10 +55,10 @@ export class Cannon {
   resize(width, height) {
     const isNarrow = width < 850;
     let ratioX = this.config.posRatio.x;
-    // Trên màn hình hẹp/di động: đẩy pháo ra gần 2 mép hơn để luôn giữ khoảng trống ở giữa
+    // Trên màn hình hẹp/di động: đẩy pháo ra gần 2 mép hơn để luôn giữ khoảng trống rộng rãi ở giữa
     if (isNarrow) {
-      if (this.slotId === 0 || this.slotId === 2) ratioX = 0.14;
-      if (this.slotId === 1 || this.slotId === 3) ratioX = 0.86;
+      if (this.slotId === 0 || this.slotId === 2) ratioX = 0.13;
+      if (this.slotId === 1 || this.slotId === 3) ratioX = 0.87;
     }
     this.x = width * ratioX;
     this.y = height * this.config.posRatio.y;
@@ -155,19 +155,81 @@ export class Cannon {
 
     // Tính tọa độ đầu nòng súng
     const barrelLength = 48;
-    const tipX = this.x + Math.cos(this.angle) * barrelLength;
-    const tipY = this.y + Math.sin(this.angle) * barrelLength;
+    const baseTipX = this.x + Math.cos(this.angle) * barrelLength;
+    const baseTipY = this.y + Math.sin(this.angle) * barrelLength;
 
-    const bullet = new Bullet(
-      `bullet_${this.slotId}_${Date.now()}_${Math.random()}`,
-      this.slotId,
-      tipX,
-      tipY,
-      this.angle,
-      this.bet,
-      this.color,
-      activeSpecial
-    );
+    const bullets = [];
+    const perpAngle = this.angle + Math.PI / 2; // Góc vuông để lệch 2 bên
+
+    if (activeSpecial === 'DOUBLE') {
+      // 2 viên đạn bắn song song cùng lúc lệch 8px
+      const offset = 8;
+      const b1 = new Bullet(
+        `bullet_${this.slotId}_${Date.now()}_1`,
+        this.slotId,
+        baseTipX + Math.cos(perpAngle) * offset,
+        baseTipY + Math.sin(perpAngle) * offset,
+        this.angle,
+        this.bet,
+        this.color,
+        activeSpecial
+      );
+      const b2 = new Bullet(
+        `bullet_${this.slotId}_${Date.now()}_2`,
+        this.slotId,
+        baseTipX - Math.cos(perpAngle) * offset,
+        baseTipY - Math.sin(perpAngle) * offset,
+        this.angle,
+        this.bet,
+        this.color,
+        activeSpecial
+      );
+      bullets.push(b1, b2);
+    } else if (activeSpecial === 'TRIPLE') {
+      // 3 viên đạn bắn tỏa quạt hình quạt (-13 độ, 0 độ, +13 độ)
+      const spreadAngles = [-0.22, 0, 0.22];
+      spreadAngles.forEach((angOffset, idx) => {
+        bullets.push(
+          new Bullet(
+            `bullet_${this.slotId}_${Date.now()}_${idx}`,
+            this.slotId,
+            baseTipX,
+            baseTipY,
+            this.angle + angOffset,
+            this.bet,
+            this.color,
+            activeSpecial
+          )
+        );
+      });
+    } else if (activeSpecial === 'MISSILE') {
+      // 1 Tên lửa tầm nhiệt tự khóa mục tiêu gần nhất
+      const bullet = new Bullet(
+        `bullet_${this.slotId}_${Date.now()}_m`,
+        this.slotId,
+        baseTipX,
+        baseTipY,
+        this.angle,
+        this.bet,
+        this.color,
+        activeSpecial,
+        this.lockedTarget || this.botTarget
+      );
+      bullets.push(bullet);
+    } else {
+      // LASER, CLUSTER, FROST hoặc đạn thường chuẩn
+      const bullet = new Bullet(
+        `bullet_${this.slotId}_${Date.now()}_${Math.random()}`,
+        this.slotId,
+        baseTipX,
+        baseTipY,
+        this.angle,
+        this.bet,
+        this.color,
+        activeSpecial
+      );
+      bullets.push(bullet);
+    }
 
     // Âm thanh và tia lửa đầu nòng
     if (activeSpecial === 'LASER') {
@@ -175,21 +237,22 @@ export class Cannon {
     } else {
       this.game.audio.playShoot(this.betIndex + 1);
     }
-    this.game.particles.addSparks(tipX, tipY, bullet.color, 8);
+    this.game.particles.addSparks(baseTipX, baseTipY, bullets[0].color, 8);
 
     // Gửi gói tin qua mạng nếu là Multiplayer
     if (this.isLocal && this.game.network && this.game.network.isMultiplayer) {
       this.game.network.broadcast({
         type: 'PLAYER_SHOOT',
         slotId: this.slotId,
-        x: tipX,
-        y: tipY,
+        x: baseTipX,
+        y: baseTipY,
         angle: this.angle,
         bet: this.bet,
+        special: activeSpecial,
       });
     }
 
-    return bullet;
+    return bullets;
   }
 
   update(dt, activeFishes) {
@@ -278,15 +341,26 @@ export class Cannon {
     // 2. Nòng súng quay theo góc (Rotating Barrel with Recoil)
     ctx.rotate(this.angle);
 
-    const isDouble = this.bet >= 100 && this.bet < 500;
-    const isTriple = this.bet >= 500;
+    const isDouble = this.specialWeapon === 'DOUBLE' || (this.bet >= 100 && this.bet < 500);
+    const isTriple = this.specialWeapon === 'TRIPLE' || this.bet >= 500;
+    const isMissile = this.specialWeapon === 'MISSILE';
     const barrelL = 44 - this.recoil;
 
     ctx.fillStyle = '#cfd8dc';
-    ctx.strokeStyle = this.color;
+    ctx.strokeStyle = this.specialWeapon ? '#ffd700' : this.color;
     ctx.lineWidth = 2;
 
-    if (isTriple) {
+    if (isMissile) {
+      // Hộp phóng tên lửa chiến hạm hầm hố
+      ctx.fillStyle = '#37474f';
+      ctx.fillRect(-this.recoil, -12, barrelL + 6, 24);
+      ctx.strokeRect(-this.recoil, -12, barrelL + 6, 24);
+      // Nòng tên lửa đỏ
+      ctx.fillStyle = '#ff1744';
+      ctx.beginPath();
+      ctx.arc(barrelL + 2 - this.recoil, 0, 6, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (isTriple) {
       // 3 nòng pháo siêu cấp
       [-9, 0, 9].forEach(offset => {
         ctx.fillRect(-this.recoil, offset - 4, barrelL, 8);
@@ -306,7 +380,7 @@ export class Cannon {
 
     // Lõi năng lượng giữa mâm pháo
     ctx.rotate(-this.angle); // Reset xoay để vẽ tâm
-    ctx.fillStyle = this.color;
+    ctx.fillStyle = this.specialWeapon ? '#ffd700' : this.color;
     ctx.beginPath();
     ctx.arc(0, 0, 16, 0, Math.PI * 2);
     ctx.fill();

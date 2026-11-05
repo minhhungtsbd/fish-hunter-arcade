@@ -138,8 +138,9 @@ export class NetworkManager {
         if (cannon) {
           cannon.angle = msg.angle;
           cannon.bet = msg.bet;
-          const bullet = cannon.shoot();
-          if (bullet) this.game.bullets.push(bullet);
+          if (msg.special) cannon.specialWeapon = msg.special;
+          const bullets = cannon.shoot();
+          if (bullets) this.game.addBullets(bullets);
         }
         break;
       }
