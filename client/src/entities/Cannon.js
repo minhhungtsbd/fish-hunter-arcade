@@ -124,9 +124,9 @@ export class Cannon {
   shoot() {
     if (!this.canShoot()) {
       if (this.coins < this.bet && this.isLocal) {
-        this.game.particles.addFloatingText(this.x, this.y - 40, 'HẾT XU! GIẢI ĐỐ NHẬN XU MIỄN PHÍ', '#ff1744', 20);
-        if (this.game.ui) {
-          this.game.ui.openQuizModal();
+        if (!this.lastCoinWarn || Date.now() - this.lastCoinWarn > 1800) {
+          this.lastCoinWarn = Date.now();
+          this.game.particles.addFloatingText(this.x, this.y - 45, '⚠️ HẾT XU! VÀO CÀI ĐẶT ➔ CỨU TRỢ XU', '#ff5252', 18);
         }
       }
       return null;

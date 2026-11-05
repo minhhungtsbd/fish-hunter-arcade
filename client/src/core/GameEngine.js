@@ -667,6 +667,46 @@ export class GameEngine {
     // 5. Vẽ 4 nòng pháo & bảng tên người chơi
     this.cannons.forEach(c => c.render(this.ctx));
 
+    // 5.5. Vẽ tâm ngắm khóa mục tiêu (Target Lock) cho người chơi
+    const localCannon = this.cannons[this.localSlotId];
+    if (localCannon && localCannon.lockedTarget && !localCannon.lockedTarget.isDead) {
+      const t = localCannon.lockedTarget;
+      this.ctx.save();
+      this.ctx.translate(t.x, t.y);
+      const pulse = 1 + Math.sin(this.oceanTime * 8) * 0.1;
+      const r = (t.radius + 16) * pulse;
+      this.ctx.strokeStyle = '#ff1744';
+      this.ctx.lineWidth = 2.5;
+      this.ctx.shadowColor = '#ff1744';
+      this.ctx.shadowBlur = 12;
+
+      // Vòng tròn khóa
+      this.ctx.beginPath();
+      this.ctx.arc(0, 0, r, 0, Math.PI * 2);
+      this.ctx.stroke();
+
+      // 4 vạch tiêu ngắm
+      [-r, r].forEach(x => {
+        this.ctx.beginPath();
+        this.ctx.moveTo(x - 6, 0);
+        this.ctx.lineTo(x + 6, 0);
+        this.ctx.stroke();
+      });
+      [-r, r].forEach(y => {
+        this.ctx.beginPath();
+        this.ctx.moveTo(0, y - 6);
+        this.ctx.lineTo(0, y + 6);
+        this.ctx.stroke();
+      });
+
+      // Nhãn ĐÃ KHÓA
+      this.ctx.fillStyle = '#ff1744';
+      this.ctx.font = 'bold 11px sans-serif';
+      this.ctx.textAlign = 'center';
+      this.ctx.fillText('TARGET LOCKED', 0, -r - 6);
+      this.ctx.restore();
+    }
+
     this.ctx.restore();
   }
 
